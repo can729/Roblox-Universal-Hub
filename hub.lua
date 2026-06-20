@@ -1,58 +1,63 @@
--- FURENT_LSC v4.0 - Advanced Module Hub
+-- FURENT_LSC v5.0 - Premium Visuals
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- [GUI Setup]
-local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui")); ScreenGui.Name = "FURENT_LSC_UI"
-local MainFrame = Instance.new("Frame", ScreenGui); MainFrame.Size = UDim2.new(0, 300, 0, 500); MainFrame.Position = UDim2.new(0.5, -150, 0.5, -250)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20); MainFrame.Draggable = true; MainFrame.Active = true
+-- [GUI Tasarım: Premium]
+local ScreenGui = Instance.new("ScreenGui", PlayerGui); ScreenGui.Name = "FURENT_LSC_UI"
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 300, 0, 400); MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20); MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(255, 0, 0) -- Kırmızı kenar
+MainFrame.Active = true; MainFrame.Draggable = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
--- [Modül Yönetimi]
-local Settings = {Speed = 16, Jump = 50, ESP = false, Noclip = false, Fly = false}
-
-local function CreateButton(text, parent, callback)
-    local btn = Instance.new("TextButton", parent); btn.Size = UDim2.new(0, 280, 0, 35); btn.Text = text
-    btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); btn.TextColor3 = Color3.new(1,1,1); btn.MouseButton1Click:Connect(callback)
+-- [Kar Yağışı Efekti]
+local SnowContainer = Instance.new("Frame", MainFrame)
+SnowContainer.Size = UDim2.new(1, 0, 1, 0); SnowContainer.BackgroundTransparency = 1
+local function CreateSnow()
+    local flake = Instance.new("Frame", SnowContainer)
+    flake.Size = UDim2.new(0, 3, 0, 3); flake.BackgroundColor3 = Color3.new(1,1,1)
+    flake.Position = UDim2.new(math.random(), 0, -0.1, 0)
+    flake.BorderSizePixel = 0
+    RunService.RenderStepped:Connect(function()
+        flake.Position = flake.Position + UDim2.new(0, 0, 0.002, 0)
+        if flake.Position.Y.Scale > 1 then flake.Position = UDim2.new(math.random(), 0, -0.1, 0) end
+    end)
 end
+for i = 1, 20 do CreateSnow() end
 
--- [Movement Engine]
+-- [Menü Başlığı]
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 50); Title.Text = "FURENT_LSC"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0); Title.Font = Enum.Font.GothamBold
+Title.BackgroundTransparency = 1
+
+-- [Hız Ayarı (Slider)]
+local WalkSpeed = 16
+local SliderBG = Instance.new("Frame", MainFrame); SliderBG.Size = UDim2.new(0, 260, 0, 20)
+SliderBG.Position = UDim2.new(0, 20, 0, 80); SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new(0, 50, 1, 0)
+SliderFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+SliderBG.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local p = math.clamp((input.Position.X - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1)
+        SliderFill.Size = UDim2.new(p, 0, 1, 0); WalkSpeed = 10 + (p * 490)
+    end
+end)
+
+-- [ESP & Hız Loop]
 RunService.RenderStepped:Connect(function()
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-        local H = LocalPlayer.Character.Humanoid
-        H.WalkSpeed = Settings.Speed
-        H.JumpPower = Settings.Jump
-        if Settings.Noclip then
-            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end
-        end
+        LocalPlayer.Character.Humanoid.WalkSpeed = WalkSpeed
     end
 end)
 
--- [ESP Module (Highlight Based)]
-local function ToggleESP()
-    Settings.ESP = not Settings.ESP
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            if Settings.ESP then
-                local h = Instance.new("Highlight", p.Character); h.Name = "ESP_Box"
-                h.FillColor = Color3.fromRGB(0, 255, 255); h.OutlineColor = Color3.new(1,1,1)
-            else
-                if p.Character:FindFirstChild("ESP_Box") then p.Character.ESP_Box:Destroy() end
-            end
-        end
+-- [Kontrol: Insert Tuşu]
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == Enum.KeyCode.Insert then
+        MainFrame.Visible = not MainFrame.Visible
     end
-end
-
--- [Menü Yapılandırması]
-CreateButton("Toggle ESP (Box/Chams)", MainFrame, ToggleESP)
-CreateButton("Noclip: " .. (Settings.Noclip and "ON" or "OFF"), MainFrame, function() Settings.Noclip = not Settings.Noclip end)
-CreateButton("Speed 50", MainFrame, function() Settings.Speed = 50 end)
-CreateButton("Speed 100", MainFrame, function() Settings.Speed = 100 end)
-CreateButton("Reset Speed", MainFrame, function() Settings.Speed = 16 end)
-CreateButton("Infinite Jump", MainFrame, function() 
-    UserInputService.JumpRequest:Connect(function() LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end)
 end)
-
-UserInputService.InputBegan:Connect(function(input) if input.KeyCode == Enum.KeyCode.RightShift then MainFrame.Visible = not MainFrame.Visible end end)
