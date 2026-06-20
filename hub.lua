@@ -1,47 +1,78 @@
--- Modern Hub v2.0
+-- Modern Universal Hub v3.0
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Arayüzü oluştur (ZIndex ile en üst katman)
+-- [GUI Tasarım]
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
-ScreenGui.Name = "ModernHub"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
+ScreenGui.Name = "UniversalHub"
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Name = "Main"
-MainFrame.Size = UDim2.new(0, 260, 0, 320)
-MainFrame.Position = UDim2.new(0.5, -130, 0.5, -160)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-MainFrame.BorderSizePixel = 0
+MainFrame.Size = UDim2.new(0, 300, 0, 400)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 MainFrame.Active = true
-MainFrame.Draggable = true -- Sürüklenebilir
+MainFrame.Draggable = true
 
--- Şık bir başlık
 local Title = Instance.new("TextLabel", MainFrame)
 Title.Size = UDim2.new(1, 0, 0, 40)
-Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Title.Text = "UNIVERSAL HUB"
+Title.Text = "UNIVERSAL HUB - PRO"
 Title.TextColor3 = Color3.new(1, 1, 1)
-Title.Font = Enum.Font.GothamBold
-Title.BorderSizePixel = 0
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
--- Bir buton örneği
-local ToggleBtn = Instance.new("TextButton", MainFrame)
-ToggleBtn.Size = UDim2.new(0, 240, 0, 50)
-ToggleBtn.Position = UDim2.new(0, 10, 0, 60)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(60, 180, 75) -- Yeşil renk
-ToggleBtn.Text = "WalkSpeed: 50"
-ToggleBtn.TextColor3 = Color3.new(1, 1, 1)
-ToggleBtn.Font = Enum.Font.GothamSemibold
+-- [Özellik Durumları]
+local States = {Speed = false, ESP = false}
 
--- Menü Aç/Kapat (RightShift)
-UserInputService.InputBegan:Connect(function(input, gpe)
+-- [Helper Fonksiyon: Buton Oluşturucu]
+local function createButton(name, yPos, callback)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0, 280, 0, 40)
+    btn.Position = UDim2.new(0, 10, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.Text = name .. ": OFF"
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.MouseButton1Click:Connect(function()
+        callback()
+        btn.Text = name .. ": " .. (States[name] and "ON" or "OFF")
+    end)
+end
+
+-- [Mantık Motoru]
+RunService.RenderStepped:Connect(function()
+    -- Speed Hack
+    if States.Speed and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 50
+    end
+end)
+
+-- [ESP Modülü]
+local function toggleESP(state)
+    States.ESP = state
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            if state then
+                local h = Instance.new("Highlight", p.Character)
+                h.Name = "ESP_Highlight"
+                h.FillColor = Color3.fromRGB(255, 0, 0)
+            else
+                if p.Character:FindFirstChild("ESP_Highlight") then
+                    p.Character.ESP_Highlight:Destroy()
+                end
+            end
+        end
+    end
+end
+
+-- [Menüye Özellik Ekle]
+createButton("Speed", 50, function() States.Speed = not States.Speed end)
+createButton("ESP", 100, function() toggleESP(not States.ESP) end)
+
+-- [Kontrol]
+UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.RightShift then
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
-print("Hub Başarıyla Yüklendi! RightShift tuşuna bas.")
+print("Hub başarıyla yüklendi!")
