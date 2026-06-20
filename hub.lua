@@ -1,4 +1,4 @@
--- FURENT_LSC v22.4 - Anti-Crash, Full CoreGui Bypass & Skin Changer Update
+-- FURENT_LSC v22.5 - Skin Fixer & Profile/Playtime Tracker Update
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,7 +10,6 @@ local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
 -- [GUI KORUMASI VE BYPASS SİSTEMİ]
--- CoreGui'ye erişim yoksa çökmemesi için alternatif GUI hedefi belirler.
 local TargetGui = nil
 pcall(function() TargetGui = (gethui and gethui()) or game:GetService("CoreGui") end)
 if not TargetGui or not pcall(function() local _ = TargetGui.Name end) then
@@ -29,8 +28,7 @@ Blur.Name = "FURENT_Blur"; Blur.Size = 15; Blur.Enabled = true
 pcall(function() Blur.Parent = Lighting end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FURENT_PRO_UI"
-ScreenGui.ResetOnSpawn = false -- Karakter ölünce menü silinmesin
+ScreenGui.Name = "FURENT_PRO_UI"; ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = TargetGui
 
 local Main = Instance.new("Frame", ScreenGui)
@@ -53,7 +51,6 @@ for i = 1, 40 do
     flake.BackgroundTransparency = math.random(30, 70) / 100; flake.BorderSizePixel = 0
     flake.Position = UDim2.new(math.random(), 0, -math.random(), 0)
     flake.ZIndex = 0; Instance.new("UICorner", flake).CornerRadius = UDim.new(1, 0)
-    
     local speed = math.random(10, 30) / 1000
     local sway = math.random(-10, 10) / 10000
     table.insert(Snowflakes, {obj = flake, spd = speed, swy = sway})
@@ -74,8 +71,8 @@ Sidebar.ZIndex = 2; Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0,
 
 local Title = Instance.new("TextLabel", Sidebar)
 Title.Size = UDim2.new(1, 0, 0, 50); Title.Position = UDim2.new(0, 0, 0, 10)
-Title.Text = "FURENT_LSC v22.4"; Title.TextColor3 = MainGreen
-Title.Font = Enum.Font.GothamBold; Title.TextSize = 18; Title.BackgroundTransparency = 1; Title.ZIndex = 2
+Title.Text = "FURENT_LSC v22.5"; Title.TextColor3 = MainGreen
+Title.Font = Enum.Font.GothamBold; Title.TextSize = 16; Title.BackgroundTransparency = 1; Title.ZIndex = 2
 
 local TabContainer = Instance.new("Frame", Main)
 TabContainer.Size = UDim2.new(1, -170, 1, -20); TabContainer.Position = UDim2.new(0, 170, 0, 10)
@@ -148,7 +145,7 @@ local function CreateTextBox(parent, placeholder, callback)
     TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
 end
 
--- [5] İKONLU SEKMELER (Sıralı ve Düzenli)
+-- [5] İKONLU SEKMELER
 local TabVisuals    = CreateTab("👁️ Visuals", 60, true)
 local TabPlayer     = CreateTab("👤 Player", 100, false)
 local TabWorld      = CreateTab("🌍 World", 140, false)
@@ -208,16 +205,12 @@ local function isValidEgg(obj)
     local name = string.lower(obj.Name)
     if not name:find("egg") then return false end
     local badNames = {"crate", "safe", "chest", "present", "gift", "loot", "safe_locker"}
-    for _, bad in ipairs(badNames) do
-        if name:find(bad) then return false end
-    end
+    for _, bad in ipairs(badNames) do if name:find(bad) then return false end end
     local hasPrompt = false
     for _, prompt in ipairs(obj:GetDescendants()) do
         if prompt:IsA("ProximityPrompt") then
             local promptText = string.lower(prompt.ObjectText .. " " .. prompt.ActionText)
-            if promptText:find("open") or promptText:find("egg") then
-                hasPrompt = true; break
-            end
+            if promptText:find("open") or promptText:find("egg") then hasPrompt = true; break end
         end
     end
     return hasPrompt
@@ -231,35 +224,30 @@ task.spawn(function()
                 if index % 200 == 0 then task.wait() end
                 if isValidEgg(obj) then
                     if not obj:FindFirstChild("F_EggChams") then
-                        local hl = Instance.new("Highlight")
-                        hl.Name = "F_EggChams"; hl.FillColor = Color3.fromRGB(255, 215, 0); hl.FillTransparency = 0.4; hl.OutlineColor = MainGreen; hl.Parent = obj
+                        local hl = Instance.new("Highlight", obj)
+                        hl.Name = "F_EggChams"; hl.FillColor = Color3.fromRGB(255, 215, 0); hl.FillTransparency = 0.4; hl.OutlineColor = MainGreen
                     end
                     if not obj:FindFirstChild("F_EggESP") then
-                        local eggText = "Yumurta"
                         local multiplierText = ""
                         local matchText = string.match(obj.Name, "%d+x") or string.match(obj.Name, "x%d+")
-                        if matchText then
-                            multiplierText = matchText
-                        else
+                        if matchText then multiplierText = matchText else
                             for _, child in ipairs(obj:GetDescendants()) do
                                 if child:IsA("TextLabel") and (string.find(string.lower(child.Text), "x") or string.match(child.Text, "%d+")) then
                                     multiplierText = child.Text; break
                                 end
                             end
                         end
-                        if multiplierText ~= "" then eggText = eggText .. " (" .. multiplierText .. ")" end
+                        local eggText = "Yumurta" .. (multiplierText ~= "" and (" (" .. multiplierText .. ")") or "")
                         
-                        local bgui = Instance.new("BillboardGui")
+                        local bgui = Instance.new("BillboardGui", obj)
                         bgui.Name = "F_EggESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 150, 0, 40); bgui.StudsOffset = Vector3.new(0, 5, 0)
                         local lbl = Instance.new("TextLabel", bgui)
-                        lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1; lbl.Text = eggText; lbl.TextColor3 = Color3.fromRGB(0, 255, 255); lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 16; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
-                        bgui.Parent = obj
+                        lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1; lbl.Text = eggText; lbl.TextColor3 = Color3.fromRGB(0, 255, 255); lbl.Font = Enum.Font.GothamBold; lbl.TextSize = 16; lbl.TextStrokeTransparency = 0
                     end
                 end
             end
         else
-            local allObjects = workspace:GetDescendants()
-            for index, obj in ipairs(allObjects) do
+            for index, obj in ipairs(workspace:GetDescendants()) do
                 if index % 200 == 0 then task.wait() end
                 if obj:IsA("Model") then
                     if obj:FindFirstChild("F_EggChams") then obj.F_EggChams:Destroy() end
@@ -332,7 +320,7 @@ CreateButton(TabTeleport, "Kaydedilen Konuma Işınlan", function()
     if SavedPos and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = SavedPos end
 end)
 
--- [10] AUTOFARM SİSTEMLERİ (GÜVENLİ ÇEMBERLİ)
+-- [10] AUTOFARM SİSTEMLERİ
 local AutoFarmOn = false; local AutoTapOn = false; local AutoEggOn = false
 
 CreateToggle(TabAutoFarm, "Smart Auto-Farm (Kırılabilir Kutu)", function(state)
@@ -361,10 +349,7 @@ CreateToggle(TabAutoFarm, "Smart Auto-Farm (Kırılabilir Kutu)", function(state
                                 end
                             end
                         end
-                        if target then
-                            LocalPlayer.Character.HumanoidRootPart.CFrame = target.CFrame * CFrame.new(0, 3, 0)
-                            task.wait(0.5)
-                        end
+                        if target then LocalPlayer.Character.HumanoidRootPart.CFrame = target.CFrame * CFrame.new(0, 3, 0); task.wait(0.5) end
                     end
                 end)
                 task.wait(0.1)
@@ -410,8 +395,34 @@ CreateToggle(TabAutoFarm, "Auto Hatch Nearest Egg", function(state)
     end
 end)
 
--- [11] GELİŞMİŞ SKIN CHANGER (KARAKTER ÖZELLEŞTİRİCİ)
+-- [11] GELİŞMİŞ SKIN CHANGER (KARAKTER ÖZELLEŞTİRİCİ - FİX)
 local ChangerData = { Shirt = "", Pants = "", Face = "", Acc = "" }
+
+-- Katalog ID'sini gerçek Doku (Texture) ID'sine çeviren fonksiyon
+local function ApplyDecalOrTemplate(character, id, className, parentName)
+    pcall(function()
+        local item = character:FindFirstChildOfClass(className)
+        if not item then
+            item = Instance.new(className, character)
+            item.Name = parentName or className
+        end
+        
+        local targetId = "rbxassetid://" .. id
+        pcall(function()
+            -- Exploit fonksiyonu kullanarak asset içindeki gerçek ID'yi çekmeye çalışıyoruz
+            local objects = game:GetObjects("rbxassetid://" .. id)
+            if objects and objects[1] then
+                if className == "Shirt" and objects[1]:IsA("Shirt") then targetId = objects[1].ShirtTemplate
+                elseif className == "Pants" and objects[1]:IsA("Pants") then targetId = objects[1].PantsTemplate
+                elseif className == "Decal" and objects[1]:IsA("Decal") then targetId = objects[1].Texture end
+            end
+        end)
+
+        if className == "Shirt" then item.ShirtTemplate = targetId
+        elseif className == "Pants" then item.PantsTemplate = targetId
+        elseif className == "Decal" then item.Texture = targetId end
+    end)
+end
 
 CreateTextBox(TabSkinChanger, "Kıyafet ID (Shirt)...", function(txt) ChangerData.Shirt = txt end)
 CreateTextBox(TabSkinChanger, "Pantolon ID (Pants)...", function(txt) ChangerData.Pants = txt end)
@@ -422,41 +433,18 @@ CreateButton(TabSkinChanger, "Karakteri Değiştir (Apply Skin)", function()
     local character = LocalPlayer.Character
     if not character then return end
     
-    if ChangerData.Shirt ~= "" then
-        pcall(function()
-            local shirt = character:FindFirstChildOfClass("Shirt")
-            if not shirt then shirt = Instance.new("Shirt", character) end
-            shirt.ShirtTemplate = "rbxassetid://" .. ChangerData.Shirt
-        end)
-    end
-    
-    if ChangerData.Pants ~= "" then
-        pcall(function()
-            local pants = character:FindFirstChildOfClass("Pants")
-            if not pants then pants = Instance.new("Pants", character) end
-            pants.PantsTemplate = "rbxassetid://" .. ChangerData.Pants
-        end)
-    end
-    
+    if ChangerData.Shirt ~= "" then ApplyDecalOrTemplate(character, ChangerData.Shirt, "Shirt") end
+    if ChangerData.Pants ~= "" then ApplyDecalOrTemplate(character, ChangerData.Pants, "Pants") end
     if ChangerData.Face ~= "" then
-        pcall(function()
-            local head = character:FindFirstChild("Head")
-            if head then
-                local face = head:FindFirstChild("face")
-                if not face then face = Instance.new("Decal", head); face.Name = "face" end
-                face.Texture = "rbxassetid://" .. ChangerData.Face
-            end
-        end)
+        local head = character:FindFirstChild("Head")
+        if head then ApplyDecalOrTemplate(head, ChangerData.Face, "Decal", "face") end
     end
-    
     if ChangerData.Acc ~= "" then
         pcall(function()
             local objects = game:GetObjects("rbxassetid://" .. ChangerData.Acc)
             if objects and objects[1] then
                 local asset = objects[1]
-                if asset:IsA("Accessory") or asset:IsA("Hat") then
-                    asset.Parent = character
-                end
+                if asset:IsA("Accessory") or asset:IsA("Hat") then asset.Parent = character end
             end
         end)
     end
@@ -471,7 +459,56 @@ CreateButton(TabSkinChanger, "Tüm Aksesuarları Temizle", function()
     end
 end)
 
--- [12] SETTINGS
+-- [12] SETTINGS (PROFIL VE OYNAMA SÜRESİ EKLENDİ)
+
+-- Profil Çerçevesi
+local ProfileFrame = Instance.new("Frame", TabSettings)
+ProfileFrame.Size = UDim2.new(1, -10, 0, 80)
+ProfileFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 6)
+
+local AvatarImage = Instance.new("ImageLabel", ProfileFrame)
+AvatarImage.Size = UDim2.new(0, 60, 0, 60)
+AvatarImage.Position = UDim2.new(0, 10, 0, 10)
+AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
+
+-- Profil fotoğrafını çek
+pcall(function()
+    local thumbType = Enum.ThumbnailType.HeadShot
+    local thumbSize = Enum.ThumbnailSize.Size420x420
+    local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, thumbType, thumbSize)
+    if isReady then AvatarImage.Image = content end
+end)
+
+local NameLabel = Instance.new("TextLabel", ProfileFrame)
+NameLabel.Size = UDim2.new(1, -90, 0, 30)
+NameLabel.Position = UDim2.new(0, 80, 0, 10)
+NameLabel.BackgroundTransparency = 1
+NameLabel.Text = "👤 " .. LocalPlayer.Name
+NameLabel.TextColor3 = MainGreen
+NameLabel.Font = Enum.Font.GothamBold
+NameLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local TimeLabel = Instance.new("TextLabel", ProfileFrame)
+TimeLabel.Size = UDim2.new(1, -90, 0, 30)
+TimeLabel.Position = UDim2.new(0, 80, 0, 40)
+TimeLabel.BackgroundTransparency = 1
+TimeLabel.Text = "⏱️ Oynama Süresi: 00:00:00"
+TimeLabel.TextColor3 = Color3.new(1, 1, 1)
+TimeLabel.Font = Enum.Font.Gotham
+TimeLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Oynama Süresi Hesaplayıcı (Zamanlayıcı)
+local StartTime = tick()
+RunService.RenderStepped:Connect(function()
+    local elapsed = tick() - StartTime
+    local hours = math.floor(elapsed / 3600)
+    local mins = math.floor((elapsed % 3600) / 60)
+    local secs = math.floor(elapsed % 60)
+    TimeLabel.Text = string.format("⏱️ Oynama Süresi: %02d:%02d:%02d", hours, mins, secs)
+end)
+
 local MenuKeybind = Enum.KeyCode.RightControl
 CreateToggle(TabSettings, "Arka Plan Kar Efektini Kapat", function(state)
     SnowEnabled = not state
@@ -499,4 +536,4 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end)
 
-print("FURENT_LSC v22.4 Basariyla Yuklendi!")
+print("FURENT_LSC v22.5 Başarıyla Yüklendi! Profil, Zamanlayıcı ve Skin Fixer Aktif.")
