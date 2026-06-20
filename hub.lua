@@ -180,26 +180,76 @@ task.spawn(function()
     end
 end)
 
--- YENİ EKLENEN EGG (YUMURTA) CHAMS DÖNGÜSÜ
+-- OPTİMİZE EDİLMİŞ + UZAKTAN ETKİNLİK YAZISI (2x/3x) GÖSTEREN EGG ESP MOTORU
 task.spawn(function()
-    while task.wait(1.5) do
+    while task.wait(2) do
         if VSettings.EggChams then
-            for _, obj in pairs(workspace:GetDescendants()) do
+            local allObjects = workspace:GetDescendants()
+            for index, obj in ipairs(allObjects) do
+                -- LAG ÖNLEYİCİ: Her 150 nesnede bir mikrosaniye duraklayarak FPS düşüşünü (donmayı) tamamen engeller
+                if index % 150 == 0 then task.wait() end
+                
                 if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
+                    -- [A] CHAMS (Duvar Arkası Parlama)
                     if not obj:FindFirstChild("F_EggChams") then
                         local hl = Instance.new("Highlight")
                         hl.Name = "F_EggChams"
-                        hl.FillColor = Color3.fromRGB(255, 215, 0)
+                        hl.FillColor = Color3.fromRGB(255, 215, 0) -- Canlı Altın Sarısı
                         hl.FillTransparency = 0.4
                         hl.OutlineColor = Color3.new(1, 1, 1)
                         hl.Parent = obj
                     end
+                    
+                    -- [B] TEXT ESP (Uzaktan Çarpanları Okuma: 2x, 3x vb.)
+                    if not obj:FindFirstChild("F_EggESP") then
+                        local multiplierText = ""
+                        
+                        -- 1. Yöntem: Modelin kendi isminde "2x", "3x" var mı kontrol et
+                        local matchText = string.match(obj.Name, "%d+x") or string.match(obj.Name, "x%d+")
+                        if matchText then
+                            multiplierText = matchText
+                        else
+                            -- 2. Yöntem: Modelin içindeki TextLabel'ları tara (Etkinlik yazıları genelde buradadır)
+                            for _, child in ipairs(obj:GetDescendants()) do
+                                if child:IsA("TextLabel") and (string.find(string.lower(child.Text), "x") or string.match(child.Text, "%d+")) then
+                                    multiplierText = child.Text
+                                    break
+                                end
+                            end
+                        end
+                        
+                        -- Eğer özel bir çarpan bulunamazsa sadece "Egg" yazar
+                        if multiplierText == "" then multiplierText = "Egg" end
+                        
+                        -- BillboardGui ile uzaktan görünür kılma
+                        local bgui = Instance.new("BillboardGui")
+                        bgui.Name = "F_EggESP"
+                        bgui.AlwaysOnTop = true
+                        bgui.Size = UDim2.new(0, 120, 0, 30)
+                        bgui.StudsOffset = Vector3.new(0, 4, 0) -- Yumurtanın biraz yukarısında havada asılı durur
+                        
+                        local lbl = Instance.new("TextLabel", bgui)
+                        lbl.Size = UDim2.new(1, 0, 1, 0)
+                        lbl.BackgroundTransparency = 1
+                        lbl.Text = multiplierText
+                        lbl.TextColor3 = Color3.fromRGB(0, 255, 255) -- Uzaktan en net görünen Turkuaz/Neon Mavi renk
+                        lbl.Font = Enum.Font.GothamBold
+                        lbl.TextSize = 15
+                        lbl.TextStrokeTransparency = 0 -- Siyah dış hat ekleyerek yazıyı aşırı netleştirir
+                        lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
+                        
+                        bgui.Parent = obj
+                    end
                 end
             end
         else
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj:IsA("Model") and obj:FindFirstChild("F_EggChams") then
-                    obj.F_EggChams:Destroy()
+            -- Özellik kapatıldığında hafızayı temizler (Burada da lag önleyici aktiftir)
+            local allObjects = workspace:GetDescendants()
+            for index, obj in ipairs(allObjects) do
+                if index % 150 == 0 then task.wait() end
+                if obj:IsA("Model") then
+                    if obj:FindFirstChild("F_EggChams") then obj.F_EggChams:Destroy() end
+                    if obj:FindFirstChild("F_EggESP") then obj.F_EggESP:Destroy() end
                 end
             end
         end
@@ -209,7 +259,7 @@ end)
 CreateToggle(TabVisuals, "2D Box ESP", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Çizgi)", function(s) VSettings.Tracer = s end)
 CreateToggle(TabVisuals, "Player Chams (Duvar Arkası)", function(s) VSettings.Chams = s end)
-CreateToggle(TabVisuals, "Egg Chams (Yumurta ESP)", function(s) VSettings.EggChams = s end) -- EKLENEN BUTON
+CreateToggle(TabVisuals, "Egg Chams & Çarpan ESP", function(s) VSettings.EggChams = s end)
 
 -- [7] PLAYER MODS
 local PSettings = { Speed = 30, Jump = 75 }
