@@ -163,6 +163,12 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+-- ÇIKAN OYUNCULARIN ESP KALINTILARINI TEMİZLEME MOTORU (YENİ)
+Players.PlayerRemoving:Connect(function(player)
+    if ESP_Boxes[player] then ESP_Boxes[player]:Remove(); ESP_Boxes[player] = nil end
+    if ESP_Lines[player] then ESP_Lines[player]:Remove(); ESP_Lines[player] = nil end
+end)
+
 task.spawn(function()
     while task.wait(1) do
         if VSettings.Chams then
@@ -186,7 +192,7 @@ task.spawn(function()
         if VSettings.EggChams then
             local allObjects = workspace:GetDescendants()
             for index, obj in ipairs(allObjects) do
-                -- LAG ÖNLEYİCİ: Her 150 nesnede bir mikrosaniye duraklayarak FPS düşüşünü (donmayı) tamamen engeller
+                -- LAG ÖNLEYİCİ: Her 150 nesnede bir mikrosaniye duraklayarak FPS düşüşünü tamamen engeller
                 if index % 150 == 0 then task.wait() end
                 
                 if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
@@ -209,7 +215,7 @@ task.spawn(function()
                         if matchText then
                             multiplierText = matchText
                         else
-                            -- 2. Yöntem: Modelin içindeki TextLabel'ları tara (Etkinlik yazıları genelde buradadır)
+                            -- 2. Yöntem: Modelin içindeki TextLabel'ları tara
                             for _, child in ipairs(obj:GetDescendants()) do
                                 if child:IsA("TextLabel") and (string.find(string.lower(child.Text), "x") or string.match(child.Text, "%d+")) then
                                     multiplierText = child.Text
@@ -226,16 +232,16 @@ task.spawn(function()
                         bgui.Name = "F_EggESP"
                         bgui.AlwaysOnTop = true
                         bgui.Size = UDim2.new(0, 120, 0, 30)
-                        bgui.StudsOffset = Vector3.new(0, 4, 0) -- Yumurtanın biraz yukarısında havada asılı durur
+                        bgui.StudsOffset = Vector3.new(0, 4, 0)
                         
                         local lbl = Instance.new("TextLabel", bgui)
                         lbl.Size = UDim2.new(1, 0, 1, 0)
                         lbl.BackgroundTransparency = 1
                         lbl.Text = multiplierText
-                        lbl.TextColor3 = Color3.fromRGB(0, 255, 255) -- Uzaktan en net görünen Turkuaz/Neon Mavi renk
+                        lbl.TextColor3 = Color3.fromRGB(0, 255, 255) -- Turkuaz/Neon Mavi renk
                         lbl.Font = Enum.Font.GothamBold
                         lbl.TextSize = 15
-                        lbl.TextStrokeTransparency = 0 -- Siyah dış hat ekleyerek yazıyı aşırı netleştirir
+                        lbl.TextStrokeTransparency = 0
                         lbl.TextStrokeColor3 = Color3.new(0, 0, 0)
                         
                         bgui.Parent = obj
@@ -243,7 +249,7 @@ task.spawn(function()
                 end
             end
         else
-            -- Özellik kapatıldığında hafızayı temizler (Burada da lag önleyici aktiftir)
+            -- Özellik kapatıldığında hafızayı temizler
             local allObjects = workspace:GetDescendants()
             for index, obj in ipairs(allObjects) do
                 if index % 150 == 0 then task.wait() end
@@ -265,13 +271,17 @@ CreateToggle(TabVisuals, "Egg Chams & Çarpan ESP", function(s) VSettings.EggCha
 local PSettings = { Speed = 30, Jump = 75 }
 CreateSlider(TabPlayer, "Walk Speed", 30, 250, 30, function(val) PSettings.Speed = val end)
 CreateSlider(TabPlayer, "Jump Power", 75, 300, 75, function(val) PSettings.Jump = val end)
+
 local AntiVoidPart
 CreateToggle(TabPlayer, "Anti-Void", function(state)
     if state then
         AntiVoidPart = Instance.new("Part", workspace); AntiVoidPart.Size = Vector3.new(5000, 5, 5000); AntiVoidPart.Position = Vector3.new(0, -30, 0)
         AntiVoidPart.Anchored = true; AntiVoidPart.Transparency = 0.5; AntiVoidPart.Color = Color3.fromRGB(138, 43, 226)
-    else if AntiVoidPart then AntiVoidPart:Destroy() end end
+    elseif AntiVoidPart then 
+        AntiVoidPart:Destroy() 
+    end
 end)
+
 task.spawn(function()
     while task.wait(0.1) do
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
@@ -316,7 +326,8 @@ CreateButton(TabTeleport, "Kaydedilen Konuma Işınlan", function()
 end)
 
 -- [10] AUTOFARM (SAHTE SANDIK ENGELLEYİCİ & 1MS TIKLAMA)
-local AutoFarmOn = false; local AutoTapOn = false
+local AutoFarmOn = false; local AutoTapOn = false; local AutoEggOn = false -- Değişken doğru kapsama taşındı
+
 CreateToggle(TabAutoFarm, "Smart Auto-Farm (Kırılabilir Kutu)", function(state)
     AutoFarmOn = state
     if state then
@@ -362,7 +373,7 @@ CreateToggle(TabAutoFarm, "Auto Tap / Click (1ms Hızında)", function(state)
 end)
 
 CreateToggle(TabAutoFarm, "Auto Hatch Nearest Egg", function(state)
-    local AutoEggOn = state
+    AutoEggOn = state -- Döngünün kapanabilmesi için global durum güncelleniyor
     if state then
         task.spawn(function()
             while AutoEggOn do
