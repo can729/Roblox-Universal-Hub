@@ -46,43 +46,79 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Visuals Modülü (ESP)
-local ESPEnabled = false
+-- Pet Sim 99 Universal Hub v4.0
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local function CreateESP(player)
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "ESP"
-    highlight.Adornee = player.Character
-    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Kutu rengi
-    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-    highlight.FillTransparency = 0.5
-    highlight.OutlineTransparency = 0
-    highlight.Parent = player.Character
-end
+-- [GUI Tasarım]
+local ScreenGui = Instance.new("ScreenGui", PlayerGui)
+ScreenGui.Name = "UniversalHub"
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 250, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
--- ESP Toggle
-local VisualsButton = Instance.new("TextButton", MainFrame)
-VisualsButton.Size = UDim2.new(0, 240, 0, 40)
-VisualsButton.Position = UDim2.new(0, 10, 0, 120) -- Pozisyonu ayarla
-VisualsButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-VisualsButton.Text = "ESP: OFF"
-VisualsButton.TextColor3 = Color3.new(1, 1, 1)
+-- [Özellik Durumları]
+local States = {Speed = false, ItemESP = false}
 
-VisualsButton.MouseButton1Click:Connect(function()
-    ESPEnabled = not ESPEnabled
-    VisualsButton.Text = "ESP: " .. (ESPEnabled and "ON" or "OFF")
-    
-    if ESPEnabled then
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                CreateESP(p)
-            end
-        end
-    else
-        for _, p in pairs(Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("ESP") then
-                p.Character.ESP:Destroy()
+-- [ESP Fonksiyonu - Pet Sim 99 için (Yerdeki itemleri işaretler)]
+local function updateESP()
+    -- Oyunun içindeki "Coins" veya "Collectibles" klasörlerini hedefler
+    for _, item in pairs(workspace:GetDescendants()) do
+        if item:IsA("Model") and (item.Name:find("Coin") or item.Name:find("Chest")) then
+            if States.ItemESP and not item:FindFirstChild("ESP_Box") then
+                local b = Instance.new("BoxHandleAdornment", item)
+                b.Name = "ESP_Box"
+                b.Size = item:GetExtentsSize()
+                b.Adornee = item
+                b.Color3 = Color3.fromRGB(255, 255, 0)
+                b.AlwaysOnTop = true
+                b.Transparency = 0.5
+            elseif not States.ItemESP and item:FindFirstChild("ESP_Box") then
+                item.ESP_Box:Destroy()
             end
         end
     end
+end
+
+-- [Buton Oluşturucu]
+local function createButton(name, yPos, callback)
+    local btn = Instance.new("TextButton", MainFrame)
+    btn.Size = UDim2.new(0, 230, 0, 40)
+    btn.Position = UDim2.new(0, 10, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.Text = name .. ": OFF"
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.MouseButton1Click:Connect(function()
+        callback()
+        btn.Text = name .. ": " .. (States[name] and "ON" or "OFF")
+    end)
+end
+
+-- [Mantık Motoru]
+RunService.RenderStepped:Connect(function()
+    if States.Speed and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+        LocalPlayer.Character.Humanoid.WalkSpeed = 50
+    end
+    if States.ItemESP then
+        updateESP()
+    end
 end)
+
+-- [Menüye Ekle]
+createButton("Speed", 50, function() States.Speed = not States.Speed end)
+createButton("ItemESP", 100, function() States.ItemESP = not States.ItemESP end)
+
+-- [Kontrol]
+UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        MainFrame.Visible = not MainFrame.Visible
+    end
+end)
+
+print("Pet Sim 99 Hub Aktif!")
