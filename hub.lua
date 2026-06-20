@@ -178,10 +178,43 @@ task.spawn(function()
         end
     end
 end)
+-- FURENT_EGG_ESP v1.0 (Only Eggs)
+local RunService = game:GetService("RunService")
+local workspace = game:GetService("Workspace")
+
+local function UpdateEggESP()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        -- Sadece yumurta modellerini yakala
+        if obj:IsA("Model") and obj.Name:lower():find("egg") then
+            -- Eğer kutu yoksa ekle
+            if not obj:FindFirstChild("EggESP_Box") then
+                local b = Instance.new("BoxHandleAdornment", obj)
+                b.Name = "EggESP_Box"
+                b.Adornee = obj
+                b.Size = obj:GetExtentsSize()
+                b.Color3 = Color3.fromRGB(255, 255, 0) -- Sarı Renk
+                b.AlwaysOnTop = true
+                b.Transparency = 0.3
+            end
+        end
+    end
+end
+
+-- Saniyede 1 kez tarama yapar (FPS dostu)
+task.spawn(function()
+    while task.wait(1) do
+        UpdateEggESP()
+    end
+end)
+
+-- Temizlik (Kapatmak istersen bu kodu tekrar çalıştırıp kutuları silebilirsin)
+print("FURENT Egg ESP Aktif!")
 
 CreateToggle(TabVisuals, "2D Box ESP", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Çizgi)", function(s) VSettings.Tracer = s end)
 CreateToggle(TabVisuals, "Player Chams (Duvar Arkası)", function(s) VSettings.Chams = s end)
+CreateToggle(TabVisuals, "Egg ESP", function(s) VSettings.Chams = s end)
+
 
 -- [7] PLAYER MODS
 local PSettings = { Speed = 30, Jump = 75 }
