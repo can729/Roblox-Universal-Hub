@@ -1,4 +1,5 @@
 -- FURENT_LSC v22.0 - Icons & Ultimate Optimization Update
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -131,7 +132,7 @@ local function CreateTextBox(parent, placeholder, callback)
     TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
 end
 
--- [5] İKONLU SEKMELERİ OLUŞTUR (Yeni Özellik!)
+-- [5] İKONLU SEKMELERİ OLUŞTUR
 local TabVisuals = CreateTab("👁️ Visuals", 70, true)
 local TabPlayer  = CreateTab("👤 Player", 115, false)
 local TabWorld   = CreateTab("🌍 World", 160, false)
@@ -139,8 +140,8 @@ local TabTeleport= CreateTab("📍 Teleport", 205, false)
 local TabAutoFarm= CreateTab("⚡ AutoFarm", 250, false)
 local TabSettings= CreateTab("⚙️ Settings", 295, false)
 
--- [6] VISUALS (ESP & CHAMS)
-local VSettings = { Box = false, Tracer = false, Chams = false }
+-- [6] VISUALS (ESP & CHAMS & EGG CHAMS)
+local VSettings = { Box = false, Tracer = false, Chams = false, EggChams = false }
 local ESP_Boxes = {}; local ESP_Lines = {}
 
 RunService.RenderStepped:Connect(function()
@@ -178,43 +179,37 @@ task.spawn(function()
         end
     end
 end)
--- FURENT_EGG_ESP v1.0 (Only Eggs)
-local RunService = game:GetService("RunService")
-local workspace = game:GetService("Workspace")
 
-local function UpdateEggESP()
-    for _, obj in pairs(workspace:GetDescendants()) do
-        -- Sadece yumurta modellerini yakala
-        if obj:IsA("Model") and obj.Name:lower():find("egg") then
-            -- Eğer kutu yoksa ekle
-            if not obj:FindFirstChild("EggESP_Box") then
-                local b = Instance.new("BoxHandleAdornment", obj)
-                b.Name = "EggESP_Box"
-                b.Adornee = obj
-                b.Size = obj:GetExtentsSize()
-                b.Color3 = Color3.fromRGB(255, 255, 0) -- Sarı Renk
-                b.AlwaysOnTop = true
-                b.Transparency = 0.3
+-- YENİ EKLENEN EGG (YUMURTA) CHAMS DÖNGÜSÜ
+task.spawn(function()
+    while task.wait(1.5) do
+        if VSettings.EggChams then
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("Model") and string.find(string.lower(obj.Name), "egg") then
+                    if not obj:FindFirstChild("F_EggChams") then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "F_EggChams"
+                        hl.FillColor = Color3.fromRGB(255, 215, 0)
+                        hl.FillTransparency = 0.4
+                        hl.OutlineColor = Color3.new(1, 1, 1)
+                        hl.Parent = obj
+                    end
+                end
+            end
+        else
+            for _, obj in pairs(workspace:GetDescendants()) do
+                if obj:IsA("Model") and obj:FindFirstChild("F_EggChams") then
+                    obj.F_EggChams:Destroy()
+                end
             end
         end
     end
-end
-
--- Saniyede 1 kez tarama yapar (FPS dostu)
-task.spawn(function()
-    while task.wait(1) do
-        UpdateEggESP()
-    end
 end)
-
--- Temizlik (Kapatmak istersen bu kodu tekrar çalıştırıp kutuları silebilirsin)
-print("FURENT Egg ESP Aktif!")
 
 CreateToggle(TabVisuals, "2D Box ESP", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Çizgi)", function(s) VSettings.Tracer = s end)
 CreateToggle(TabVisuals, "Player Chams (Duvar Arkası)", function(s) VSettings.Chams = s end)
-CreateToggle(TabVisuals, "Egg ESP", function(s) VSettings.Chams = s end)
-
+CreateToggle(TabVisuals, "Egg Chams (Yumurta ESP)", function(s) VSettings.EggChams = s end) -- EKLENEN BUTON
 
 -- [7] PLAYER MODS
 local PSettings = { Speed = 30, Jump = 75 }
@@ -282,7 +277,6 @@ CreateToggle(TabAutoFarm, "Smart Auto-Farm (Kırılabilir Kutu)", function(state
                     local myPos = LocalPlayer.Character.HumanoidRootPart.Position
                     for _, obj in ipairs(workspace:GetDescendants()) do
                         local name = string.lower(obj.Name)
-                        -- VIP, Social, Reward sandıklarını atlar!
                         if not name:find("social") and not name:find("reward") and not name:find("vip") and not name:find("group") then
                             if obj:IsA("Model") and (name:find("coin") or name:find("chest") or name:find("breakable")) then
                                 local part = obj:FindFirstChildWhichIsA("BasePart")
@@ -357,6 +351,6 @@ end)
 UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == MenuKeybind then
         Main.Visible = not Main.Visible
-        Blur.Enabled = Main.Visible -- Menü kapanınca bulanıklık da gider
+        Blur.Enabled = Main.Visible
     end
 end)
