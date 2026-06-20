@@ -1,4 +1,4 @@
--- FURENT_LSC v1.0 - Icons & Ultimate Optimization Update
+-- FURENT_LSC v22.0 - Icons & Ultimate Optimization Update
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
