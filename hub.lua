@@ -46,33 +46,43 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- [ESP Modülü]
-local function toggleESP(state)
-    States.ESP = state
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            if state then
-                local h = Instance.new("Highlight", p.Character)
-                h.Name = "ESP_Highlight"
-                h.FillColor = Color3.fromRGB(255, 0, 0)
-            else
-                if p.Character:FindFirstChild("ESP_Highlight") then
-                    p.Character.ESP_Highlight:Destroy()
-                end
+-- Visuals Modülü (ESP)
+local ESPEnabled = false
+
+local function CreateESP(player)
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "ESP"
+    highlight.Adornee = player.Character
+    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Kutu rengi
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.FillTransparency = 0.5
+    highlight.OutlineTransparency = 0
+    highlight.Parent = player.Character
+end
+
+-- ESP Toggle
+local VisualsButton = Instance.new("TextButton", MainFrame)
+VisualsButton.Size = UDim2.new(0, 240, 0, 40)
+VisualsButton.Position = UDim2.new(0, 10, 0, 120) -- Pozisyonu ayarla
+VisualsButton.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+VisualsButton.Text = "ESP: OFF"
+VisualsButton.TextColor3 = Color3.new(1, 1, 1)
+
+VisualsButton.MouseButton1Click:Connect(function()
+    ESPEnabled = not ESPEnabled
+    VisualsButton.Text = "ESP: " .. (ESPEnabled and "ON" or "OFF")
+    
+    if ESPEnabled then
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                CreateESP(p)
+            end
+        end
+    else
+        for _, p in pairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("ESP") then
+                p.Character.ESP:Destroy()
             end
         end
     end
-end
-
--- [Menüye Özellik Ekle]
-createButton("Speed", 50, function() States.Speed = not States.Speed end)
-createButton("ESP", 100, function() toggleESP(not States.ESP) end)
-
--- [Kontrol]
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.RightShift then
-        MainFrame.Visible = not MainFrame.Visible
-    end
 end)
-
-print("Hub başarıyla yüklendi!")
