@@ -1,4 +1,4 @@
--- FURENT_LSC v1.0 - Pet Simulator 99 Optimized
+-- FURENT_LSC v0.1 - Pet Simulator 99 Optimized
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
