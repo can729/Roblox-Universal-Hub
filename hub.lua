@@ -1,7 +1,9 @@
--- FURENT_LSC v17.0 - Maximum Performance (Zero Lag) Framework
+-- FURENT_LSC v18.0 - Teleport & Chams Update
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
@@ -10,17 +12,16 @@ local CoreGui = game:GetService("CoreGui")
 -- [1] ARAYÜZ TEMİZLİĞİ
 if CoreGui:FindFirstChild("FURENT_PRO_UI") then CoreGui.FURENT_PRO_UI:Destroy() end
 
--- [2] ANA ARAYÜZ OLUŞTURMA (Dark/Purple Theme)
+-- [2] ANA ARAYÜZ OLUŞTURMA
 local ScreenGui = Instance.new("ScreenGui", CoreGui); ScreenGui.Name = "FURENT_PRO_UI"
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 500, 0, 350); Main.Position = UDim2.new(0.5, -250, 0.5, -175)
+Main.Size = UDim2.new(0, 520, 0, 380); Main.Position = UDim2.new(0.5, -260, 0.5, -190)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 20); Main.BorderSizePixel = 0
 Main.Active = true; Main.Draggable = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
 
 local Sidebar = Instance.new("Frame", Main)
 Sidebar.Size = UDim2.new(0, 140, 1, 0); Sidebar.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-Sidebar.BorderSizePixel = 0
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 8)
 
 local Title = Instance.new("TextLabel", Sidebar)
@@ -32,7 +33,7 @@ local TabContainer = Instance.new("Frame", Main)
 TabContainer.Size = UDim2.new(1, -150, 1, -20); TabContainer.Position = UDim2.new(0, 150, 0, 10)
 TabContainer.BackgroundTransparency = 1
 
--- [3] UI FRAMEWORK MANTIĞI
+-- [3] UI FRAMEWORK (Genişletildi: TextBox ve Button eklendi)
 local Tabs = {}
 local function CreateTab(name, yPos, isActiveDefault)
     local TabBtn = Instance.new("TextButton", Sidebar)
@@ -80,101 +81,116 @@ local function CreateToggle(parent, text, callback)
     ToggleBtn.MouseButton1Click:Connect(function()
         state = not state
         ToggleBtn.BackgroundColor3 = state and Color3.fromRGB(138, 43, 226) or Color3.fromRGB(50, 50, 50)
-        task.spawn(function() pcall(callback, state) end) -- Hata olursa çökmeyi engeller
+        task.spawn(function() pcall(callback, state) end)
     end)
 end
 
-local TabVisuals = CreateTab("Visuals (ESP)", 70, true)
-local TabPlayer = CreateTab("Player Mods", 115, false)
-
--- [4] SIFIR KASMA GARANTİLİ ESP MOTORU
-local Settings = { ESP_Box = false, Item_ESP = false, Fullbright = false, WalkSpeed = 16 }
-local ESP_Boxes = {}
-local ItemConnection = nil
-
--- Oyuncu ESP (Sadece aktif oyuncuları tarar)
-RunService.RenderStepped:Connect(function()
-    if Settings.ESP_Box then
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
-                if not ESP_Boxes[player] then
-                    local box = Drawing.new("Square")
-                    box.Color = Color3.fromRGB(138, 43, 226); box.Thickness = 1.5; box.Filled = false
-                    ESP_Boxes[player] = box
-                end
-                
-                local box = ESP_Boxes[player]
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-                    local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                    if onScreen then
-                        box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z)
-                        box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2)
-                        box.Visible = true
-                    else box.Visible = false end
-                else box.Visible = false end
-            end
-        end
-    else
-        -- ESP kapatıldığında belleği temizle
-        for _, box in pairs(ESP_Boxes) do box.Visible = false end
-    end
-end)
-
--- Item ESP (Optimize Edilmiş Event Bazlı Sistem)
-local function HighlightItem(obj)
-    if obj:IsA("Model") and (obj.Name:find("Coin") or obj.Name:find("Chest") or obj.Name:find("Egg")) then
-        if not obj:FindFirstChild("FURENT_HL") then
-            local hl = Instance.new("Highlight")
-            hl.Name = "FURENT_HL"; hl.FillColor = Color3.fromRGB(255, 215, 0)
-            hl.OutlineColor = Color3.fromRGB(255, 255, 255); hl.FillTransparency = 0.5
-            hl.Parent = obj
-        end
-    end
+local function CreateButton(parent, text, callback)
+    local Btn = Instance.new("TextButton", parent)
+    Btn.Size = UDim2.new(1, -10, 0, 35); Btn.BackgroundColor3 = Color3.fromRGB(138, 43, 226)
+    Btn.Text = text; Btn.TextColor3 = Color3.new(1,1,1); Btn.Font = Enum.Font.GothamBold
+    Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    Btn.MouseButton1Click:Connect(function() task.spawn(function() pcall(callback) end) end)
 end
 
-CreateToggle(TabVisuals, "Player 2D Box ESP", function(state) Settings.ESP_Box = state end)
-CreateToggle(TabVisuals, "Item/Coin ESP (No Lag)", function(state)
-    Settings.Item_ESP = state
-    if state then
-        -- 1. Mevcut itemleri yavaşça (kasmadan) bul
-        task.spawn(function()
-            local items = workspace:GetDescendants()
-            for i, obj in ipairs(items) do
-                HighlightItem(obj)
-                if i % 100 == 0 then task.wait() end -- Her 100 objede bir nefes al (Sıfır kasma)
-            end
-        end)
-        -- 2. Yeni eklenenleri otomatik yakala (Tarama yapmaz)
-        ItemConnection = workspace.DescendantAdded:Connect(HighlightItem)
-    else
-        -- Kapatıldığında temizle
-        if ItemConnection then ItemConnection:Disconnect() end
-        for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj.Name == "FURENT_HL" then obj:Destroy() end
-        end
-    end
-end)
+local function CreateTextBox(parent, placeholder, callback)
+    local TextBox = Instance.new("TextBox", parent)
+    TextBox.Size = UDim2.new(1, -10, 0, 35); TextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    TextBox.PlaceholderText = placeholder; TextBox.Text = ""
+    TextBox.TextColor3 = Color3.new(1,1,1); TextBox.Font = Enum.Font.Gotham
+    Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6)
+    TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
+end
 
--- [5] PLAYER MODÜLLERİ (Bağımsız Motor)
-CreateToggle(TabPlayer, "Fullbright (No Shadows)", function(state)
-    if state then
-        Lighting.GlobalShadows = false; Lighting.Brightness = 3
-    else
-        Lighting.GlobalShadows = true; Lighting.Brightness = 1
-    end
-end)
+-- SEKMELER
+local TabVisuals = CreateTab("Visuals", 70, true)
+local TabPlayer = CreateTab("Player Mods", 115, false)
+local TabTeleport = CreateTab("Teleport", 160, false)
 
-CreateToggle(TabPlayer, "Speed Hack (WalkSpeed 50)", function(state)
-    Settings.WalkSpeed = state and 50 or 16
-end)
+-- [4] VISUALS MODÜLLERİ (Chams Eklendi)
+local Settings = { Chams = false }
 
--- Hızı Kasmadan Uygulama Motoru
+-- CHAMS (Duvar Arkası Gösterme)
 task.spawn(function()
-    while task.wait(0.5) do
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            LocalPlayer.Character.Humanoid.WalkSpeed = Settings.WalkSpeed
+    while task.wait(1) do
+        if Settings.Chams then
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= LocalPlayer and player.Character then
+                    if not player.Character:FindFirstChild("FURENT_Chams") then
+                        local hl = Instance.new("Highlight")
+                        hl.Name = "FURENT_Chams"; hl.FillColor = Color3.fromRGB(138, 43, 226)
+                        hl.OutlineColor = Color3.fromRGB(255, 255, 255); hl.FillTransparency = 0.3
+                        hl.Parent = player.Character
+                    end
+                end
+            end
+        else
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player.Character and player.Character:FindFirstChild("FURENT_Chams") then
+                    player.Character.FURENT_Chams:Destroy()
+                end
+            end
         end
     end
+end)
+
+CreateToggle(TabVisuals, "Player Chams (Duvar Arkası)", function(state) Settings.Chams = state end)
+
+-- [5] TELEPORT SİSTEMİ (TAB 6 İSTEKLERİ)
+local TargetPlayerName = ""
+local SavedCFrame = nil
+
+-- Oyuncu Işınlanma
+CreateTextBox(TabTeleport, "Oyuncu Adını Girin (Kısmi yazılabilir)...", function(txt) TargetPlayerName = string.lower(txt) end)
+CreateButton(TabTeleport, "Yazılan Oyuncuya Işınlan", function()
+    if TargetPlayerName == "" then return end
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and string.sub(string.lower(p.Name), 1, #TargetPlayerName) == TargetPlayerName then
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame
+                break
+            end
+        end
+    end
+end)
+
+-- Waypoint (Konum Kaydet/Yükle)
+CreateButton(TabTeleport, "Mevcut Konumu Kaydet (Waypoint)", function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        SavedCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+    end
+end)
+
+CreateButton(TabTeleport, "Kaydedilen Konuma Işınlan", function()
+    if SavedCFrame and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        LocalPlayer.Character.HumanoidRootPart.CFrame = SavedCFrame
+    end
+end)
+
+-- Sunucu İşlemleri (Rejoin & Server Hop)
+CreateButton(TabTeleport, "Rejoin (Aynı Sunucuya Yeniden Bağlan)", function()
+    TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer)
+end)
+
+CreateButton(TabTeleport, "Server Hop (Farklı Bir Sunucu Bul)", function()
+    local Http = game:GetService("HttpService")
+    local TPS = game:GetService("TeleportService")
+    local Api = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+    
+    local function Hop()
+        local success, result = pcall(function()
+            return Http:JSONDecode(game:HttpGet(Api))
+        end)
+        if success and result and result.data then
+            for _, server in ipairs(result.data) do
+                if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                    TPS:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+                    return
+                end
+            end
+        end
+    end
+    Hop()
 end)
 
 -- [6] ARAYÜZÜ AÇMA/KAPAMA (Sağ CTRL)
@@ -183,5 +199,3 @@ UserInputService.InputBegan:Connect(function(input, gpe)
         Main.Visible = not Main.Visible
     end
 end)
-
-print("FURENT_LSC v17 - Optimizasyon Başarılı!")
