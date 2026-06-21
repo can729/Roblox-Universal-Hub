@@ -1,4 +1,4 @@
--- FURENT_LSC v28.1 - ULTRA VIP EDITION (UI Fix, Zero-Lag ESP, Discord Link & Premium UI)
+-- FURENT_LSC v29.0 - PRO MAX EDITION (No-Flicker ESP, AutoFarm & SkinChanger Pro)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -58,12 +58,10 @@ Main.ClipsDescendants = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = _G.ThemeColor; MainStroke.Thickness = 2; MainStroke.Transparency = 0.2
 
--- HATASI GİDERİLMİŞ UI AÇILIŞ ANİMASYONU (UIScale Kullanımı)
 local MenuScale = Instance.new("UIScale", Main)
 MenuScale.Scale = 0.8
 TweenService:Create(MenuScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
--- Buton Hover Efekti Yardımcısı
 local function AddHoverEffect(guiObject, baseColor, hoverColor, transparencyBase, transparencyHover)
     guiObject.MouseEnter:Connect(function()
         TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = hoverColor, BackgroundTransparency = transparencyHover or 0}):Play()
@@ -123,18 +121,13 @@ task.spawn(function()
         rot = rot + 4; if rot >= 360 then rot = 0 end
         pcall(function() 
             TitleGradient.Rotation = rot 
-            TitleGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, _G.ThemeColor), 
-                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)), 
-                ColorSequenceKeypoint.new(1, _G.ThemeColor)
-            }
+            TitleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, _G.ThemeColor), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1, _G.ThemeColor)}
             SidebarLine.BackgroundColor3 = _G.ThemeColor
             MainStroke.Color = _G.ThemeColor
         end) 
     end
 end)
 
--- Tıklanabilir Discord Butonu
 local DiscordBtn = Instance.new("TextButton", Sidebar)
 DiscordBtn.Size = UDim2.new(1, -20, 0, 40); DiscordBtn.Position = UDim2.new(0, 10, 1, -50)
 DiscordBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40); DiscordBtn.ZIndex = 3; DiscordBtn.Text = ""
@@ -146,12 +139,7 @@ DiscordBtn.MouseButton1Click:Connect(function()
     pcall(function()
         if setclipboard then
             setclipboard("https://discord.gg/fs28GEBuSX")
-            StarterGui:SetCore("SendNotification", {
-                Title = "FURENT LSC VIP",
-                Text = "Discord Davet Linki Panoya Kopyalandı! Tarayıcıya yapıştırabilirsin.",
-                Duration = 5,
-                Button1 = "Tamam"
-            })
+            StarterGui:SetCore("SendNotification", {Title = "FURENT LSC VIP", Text = "Discord Linki Panoya Kopyalandı!", Duration = 5, Button1 = "Tamam"})
         end
     end)
 end)
@@ -198,8 +186,7 @@ local function CreateToggle(parent, text, callback)
     local state = false
     
     ToggleBtn.MouseButton1Click:Connect(function() 
-        state = not state; 
-        TweenService:Create(ToggleBtn, TweenInfo.new(0.3), {BackgroundColor3 = state and _G.ThemeColor or Color3.fromRGB(50, 50, 60)}):Play()
+        state = not state; TweenService:Create(ToggleBtn, TweenInfo.new(0.3), {BackgroundColor3 = state and _G.ThemeColor or Color3.fromRGB(50, 50, 60)}):Play()
         task.spawn(function() pcall(callback, state) end) 
     end)
 end
@@ -251,8 +238,7 @@ local function CreateColorPicker(parent, text)
 
     local Label = Instance.new("TextLabel", Container)
     Label.Size = UDim2.new(1, -60, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10)
-    Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14
-    Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
+    Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
 
     local PreviewBox = Instance.new("Frame", Container)
     PreviewBox.Size = UDim2.new(0, 30, 0, 30); PreviewBox.Position = UDim2.new(1, -45, 0, 5)
@@ -267,14 +253,8 @@ local function CreateColorPicker(parent, text)
     end
 
     local function addMinSlider(yPos, colorName, key)
-        local SliderBG = Instance.new("Frame", Container)
-        SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, yPos)
-        SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-        Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
-        local SliderFill = Instance.new("Frame", SliderBG)
-        SliderFill.Size = UDim2.new(currentColor[key]/255, 0, 1, 0)
-        SliderFill.BackgroundColor3 = Color3.fromRGB(key=="R" and 255 or 0, key=="G" and 255 or 0, key=="B" and 255 or 0)
-        Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+        local SliderBG = Instance.new("Frame", Container); SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, yPos); SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50); Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
+        local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new(currentColor[key]/255, 0, 1, 0); SliderFill.BackgroundColor3 = Color3.fromRGB(key=="R" and 255 or 0, key=="G" and 255 or 0, key=="B" and 255 or 0); Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
 
         local dragging = false
         SliderBG.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
@@ -301,7 +281,7 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [8] VISUALS (LAG-FREE ESP & CHAMS)
+-- [8] VISUALS (TAMAMEN KIRPIŞMASIZ ESP)
 local VSettings = { Box = false, Tracer = false, RoomESP = false, Chams = false }
 
 local function ClearRoomESP()
@@ -316,20 +296,19 @@ local function CreateBillboard(parent, text, color, offset)
     lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 16; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
 end
 
--- ZERO-LAG TARAMA SİSTEMİ
+-- FIX: Arka Planda tarama yapıp, ekranı salisesinde güncelleyen Anti-Flicker sistemi
 local function UpdateRoomESP()
     if not VSettings.RoomESP then ClearRoomESP(); return end
-    ClearRoomESP()
-    
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
     local count = 0
     local processed = {}
+    local newESPData = {} -- Önce tarama verilerini bu tabloda biriktiriyoruz (Kırpışmayı önler)
 
     for _, obj in ipairs(workspace:GetDescendants()) do
         count = count + 1
-        if count % 200 == 0 then task.wait() end 
+        if count % 300 == 0 then task.wait() end -- Arka planda donmayı engeller
 
         if obj:IsA("TextLabel") or obj:IsA("TextButton") then
             local txt = string.lower(obj.Text)
@@ -338,7 +317,7 @@ local function UpdateRoomESP()
                 if rootPart and not processed[rootPart] then
                     if (rootPart.Position - hrp.Position).Magnitude < 400 then
                         processed[rootPart] = true
-                        CreateBillboard(rootPart, "🥚 " .. obj.Text, obj.TextColor3)
+                        table.insert(newESPData, {part = rootPart, text = "🥚 " .. obj.Text, color = obj.TextColor3, offset = Vector3.new(0, 5, 0)})
                     end
                 end
             end
@@ -359,11 +338,17 @@ local function UpdateRoomESP()
                     if orderNum or nameL:find("button") or nameL:find("puzzle") then
                         processed[rootPart] = true
                         local pText = orderNum and ("🎯 TIKLA! SIRA: " .. tostring(orderNum)) or "🔘 Buton"
-                        CreateBillboard(rootPart, pText, rootPart.Color, Vector3.new(0, 3, 0))
+                        table.insert(newESPData, {part = rootPart, text = pText, color = rootPart.Color, offset = Vector3.new(0, 3, 0)})
                     end
                 end
             end
         end
+    end
+
+    -- TARAMA BİTTİKTEN SONRA TEK BİR KAREDE EKRANI YENİLE (Gelip Gitme Sorunu Bitti)
+    ClearRoomESP()
+    for _, data in ipairs(newESPData) do
+        CreateBillboard(data.part, data.text, data.color, data.offset)
     end
 end
 
@@ -381,7 +366,7 @@ CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
 CreateToggle(TabVisuals, "Chams (Duvar Arkası Renk)", function(s) VSettings.Chams = s end)
 CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then pcall(UpdateRoomESP) else ClearRoomESP() end end)
-CreateButton(TabVisuals, "🔄 Odadaki Şifreleri / Yumurtaları Yenile", function() if not isScanning then isScanning = true; pcall(UpdateRoomESP); isScanning = false end end)
+CreateButton(TabVisuals, "🔄 ESP Yazılarını Anında Yenile", function() if not isScanning then isScanning = true; pcall(UpdateRoomESP); isScanning = false end end)
 
 local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
 local ESP_Boxes = {}; local ESP_Lines = {}
@@ -477,7 +462,61 @@ CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
     end
 end)
 
--- [11] SETTINGS & PROFİL
+-- [11] AUTOFARM (YENİDEN EKLENDİ VE GELİŞTİRİLDİ)
+local AutoTapOn = false
+CreateToggle(TabAutoFarm, "Auto Clicker (Hızlı Tıklama)", function(state)
+    AutoTapOn = state
+    task.spawn(function()
+        while AutoTapOn do
+            pcall(function() VirtualInputManager:SendMouseButtonEvent(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2, 0, true, game, 1); VirtualInputManager:SendMouseButtonEvent(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2, 0, false, game, 1) end)
+            task.wait(0.01)
+        end
+    end)
+end)
+
+local AutoInteractOn = false
+CreateToggle(TabAutoFarm, "Auto Interact (E Tuşu Spam)", function(state)
+    AutoInteractOn = state
+    task.spawn(function()
+        while AutoInteractOn do
+            pcall(function() VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game) end)
+            task.wait(0.1)
+        end
+    end)
+end)
+
+-- [12] SKIN CHANGER PRO
+local ChangerData = { Shirt = "", Pants = "", TShirt = "", Face = "" }
+local skinWarn = Instance.new("TextLabel", TabSkinChanger); skinWarn.Size = UDim2.new(1, -15, 0, 20); skinWarn.BackgroundTransparency = 1; skinWarn.Text = "Not: Pazardaki Katalog ID'yi değil, 'Image ID' giriniz."; skinWarn.TextColor3 = Color3.fromRGB(200, 200, 200); skinWarn.Font = Enum.Font.Gotham; skinWarn.TextSize = 12
+CreateTextBox(TabSkinChanger, "Kıyafet (Shirt) ID...", function(txt) ChangerData.Shirt = txt end)
+CreateTextBox(TabSkinChanger, "Pantolon (Pants) ID...", function(txt) ChangerData.Pants = txt end)
+CreateTextBox(TabSkinChanger, "T-Shirt ID...", function(txt) ChangerData.TShirt = txt end)
+CreateTextBox(TabSkinChanger, "Yüz (Face) ID...", function(txt) ChangerData.Face = txt end)
+
+CreateButton(TabSkinChanger, "Kombini Karakterime Uygula", function()
+    local char = LocalPlayer.Character
+    if not char then return end
+    pcall(function()
+        if ChangerData.Shirt ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("Shirt") then v:Destroy() end end; local s = Instance.new("Shirt", char); s.ShirtTemplate = "rbxassetid://" .. ChangerData.Shirt end
+        if ChangerData.Pants ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("Pants") then v:Destroy() end end; local p = Instance.new("Pants", char); p.PantsTemplate = "rbxassetid://" .. ChangerData.Pants end
+        if ChangerData.TShirt ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("ShirtGraphic") then v:Destroy() end end; local ts = Instance.new("ShirtGraphic", char); ts.Graphic = "rbxassetid://" .. ChangerData.TShirt end
+        if ChangerData.Face ~= "" and char:FindFirstChild("Head") then 
+            local face = char.Head:FindFirstChildOfClass("Decal")
+            if face then face.Texture = "rbxassetid://" .. ChangerData.Face else local nf = Instance.new("Decal", char.Head); nf.Texture = "rbxassetid://" .. ChangerData.Face end
+        end
+    end)
+end)
+
+CreateButton(TabSkinChanger, "Üzerimdeki Aksesuarları (Şapka/Saç) Sil", function()
+    local char = LocalPlayer.Character
+    if char then
+        for _, v in pairs(char:GetChildren()) do
+            if v:IsA("Accessory") or v:IsA("Hat") then v:Destroy() end
+        end
+    end
+end)
+
+-- [13] SETTINGS & PROFİL
 local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; ProfileFrame.BackgroundTransparency = 0.2; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ProfileFrame).Color = Color3.fromRGB(50, 50, 60)
 local AvatarImage = Instance.new("ImageLabel", ProfileFrame); AvatarImage.Size = UDim2.new(0, 60, 0, 60); AvatarImage.Position = UDim2.new(0, 10, 0, 10); AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
 
@@ -518,7 +557,6 @@ KeybindBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Pürüzsüz Menü Açma/Kapatma Animasyonu Düzeltildi
 AddConnection(UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == MenuKeybind then 
         if Main then 
@@ -536,4 +574,4 @@ AddConnection(UserInputService.InputBegan:Connect(function(input)
     end
 end))
 
-print("FURENT_LSC v28.1 ULTRA VIP - HATA GİDERİLDİ!")
+print("FURENT_LSC v29.0 PRO MAX YÜKLENDİ - ESP FİXLENDİ, AUTOFARM GELDİ!")
