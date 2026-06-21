@@ -16,7 +16,7 @@ local OWNER_KEY = "FURENT-OWNER-KING"
 -- 3 Hafta Sonrasının Tarihi (12 Temmuz 2026)
 local EXPIRE_DATE = os.time({year = 2026, month = 7, day = 12, hour = 23, min = 59, sec = 59})
 
--- 150 Adet Geçerli Kullanıcı Anahtarı (Virgülle Ayrılmış Liste)
+-- 150 Adet Geçerli Kullanıcı Anahtarı
 local KeysString = "FURENT-A1B2-C3D4,FURENT-E5F6-G7H8,FURENT-I9J0-K1L2,FURENT-M3N4-O5P6,FURENT-Q7R8-S9T0,FURENT-U1V2-W3X4,FURENT-Y5Z6-A7B8,FURENT-C9D0-E1F2,FURENT-G3H4-I5J6,FURENT-K7L8-M9N0,FURENT-O1P2-Q3R4,FURENT-S5T6-U7V8,FURENT-W9X0-Y1Z2,FURENT-A3B4-C5D6,FURENT-E7F8-G9H0,FURENT-I1J2-K3L4,FURENT-M5N6-O7P8,FURENT-Q9R0-S1T2,FURENT-U3V4-W5X6,FURENT-Y7Z8-A9B0,FURENT-C1D2-E3F4,FURENT-G5H6-I7J8,FURENT-K9L0-M1N2,FURENT-O3P4-Q5R6,FURENT-S7T8-U9V0,FURENT-W1X2-Y3Z4,FURENT-A5B6-C7D8,FURENT-E9F0-G1H2,FURENT-I3J4-K5L6,FURENT-M7N8-O9P0,FURENT-Q1R2-S3T4,FURENT-U5V6-W7X8,FURENT-Y9Z0-A1B2,FURENT-C3D4-E5F6,FURENT-G7H8-I9J0,FURENT-K1L2-M3N4,FURENT-O5P6-Q7R8,FURENT-S9T0-U1V2,FURENT-W3X4-Y5Z6,FURENT-A7B8-C9D0,FURENT-E1F2-G3H4,FURENT-I5J6-K7L8,FURENT-M9N0-O1P2,FURENT-Q3R4-S5T6,FURENT-U7V8-W9X0,FURENT-Y1Z2-A3B4,FURENT-C5D6-E7F8,FURENT-G9H0-I1J2,FURENT-K3L4-M5N6,FURENT-O7P8-Q9R0,FURENT-S1T2-U3V4,FURENT-W5X6-Y7Z8,FURENT-A9B0-C1D2,FURENT-E3F4-G5H6,FURENT-I7J8-K9L0,FURENT-M1N2-O3P4,FURENT-Q5R6-S7T8,FURENT-U9V0-W1X2,FURENT-Y3Z4-A5B6,FURENT-C7D8-E9F0,FURENT-G1H2-I3J4,FURENT-K5L6-M7N8,FURENT-O9P0-Q1R2,FURENT-S3T4-U5V6,FURENT-W7X8-Y9Z0,FURENT-A1B2-C3D5,FURENT-E5F6-G7H9,FURENT-I9J0-K1L3,FURENT-M3N4-O5P7,FURENT-Q7R8-S9T1,FURENT-U1V2-W3X5,FURENT-Y5Z6-A7B9,FURENT-C9D0-E1F3,FURENT-G3H4-I5J7,FURENT-K7L8-M9N1,FURENT-O1P2-Q3R5,FURENT-S5T6-U7V9,FURENT-W9X0-Y1Z3,FURENT-A3B4-C5D7,FURENT-E7F8-G9H1,FURENT-I1J2-K3L5,FURENT-M5N6-O7P9,FURENT-Q9R0-S1T3,FURENT-U3V4-W5X7,FURENT-Y7Z8-A9B1,FURENT-C1D2-E3F5,FURENT-G5H6-I7J9,FURENT-K9L0-M1N3,FURENT-O3P4-Q5R7,FURENT-S7T8-U9V1,FURENT-W1X2-Y3Z5,FURENT-A5B6-C7D9,FURENT-E9F0-G1H3,FURENT-I3J4-K5L7,FURENT-M7N8-O9P1,FURENT-Q1R2-S3T5,FURENT-U5V6-W7X9,FURENT-Y9Z0-A1B3,FURENT-C3D4-E5F7,FURENT-G7H8-I9J1,FURENT-K1L2-M3N5,FURENT-O5P6-Q7R9,FURENT-S9T0-U1V3,FURENT-W3X4-Y5Z7,FURENT-A7B8-C9D1,FURENT-E1F2-G3H5,FURENT-I5J6-K7L9,FURENT-M9N0-O1P3,FURENT-Q3R4-S5T7,FURENT-U7V8-W9X1,FURENT-Y1Z2-A3B5,FURENT-C5D6-E7F9,FURENT-G9H0-I1J3,FURENT-K3L4-M5N7,FURENT-O7P8-Q9R1,FURENT-S1T2-U3V5,FURENT-W5X6-Y7Z9,FURENT-A9B0-C1D3,FURENT-E3F4-G5H7,FURENT-I7J8-K9L1,FURENT-M1N2-O3P5,FURENT-Q5R6-S7T9,FURENT-U9V0-W1X3,FURENT-Y3Z4-A5B7,FURENT-C7D8-E9F1,FURENT-G1H2-I3J5,FURENT-K5L6-M7N9,FURENT-O9P0-Q1R3,FURENT-S3T4-U5V7,FURENT-W7X8-Y9Z1,FURENT-B1C2-D3E4,FURENT-F5G6-H7I8,FURENT-J9K0-L1M2,FURENT-N3O4-P5Q6,FURENT-R7S8-T9U0,FURENT-V1W2-X3Y4,FURENT-Z5A6-B7C8,FURENT-D9E0-F1G2,FURENT-H3I4-J5K6,FURENT-L7M8-N9O0,FURENT-P1Q2-R3S4,FURENT-T5U6-V7W8,X9Y0-Z1A2,B3C4-D5E6,F7G8-H9I0,J1K2-L3M4,N5O6-P7Q8,R9S0-T1U2,V3W4-X5Y6"
 local ValidKeys = string.split(KeysString, ",")
 
@@ -220,7 +220,7 @@ local function LoadMainUI()
     local TabSkin       = CreateTab("🎭 Skin Changer", 305, false)
     local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
-    -- [8] VISUALS (FIXED CLUSTER & LIMIT)
+    -- [1] VISUALS
     local VSettings = { Box = false, Tracer = false, RoomESP = false, Chams = false }
     local FurentESPInstances = {}
 
@@ -238,20 +238,16 @@ local function LoadMainUI()
         table.insert(FurentESPInstances, bgui)
     end
 
-    -- YENİLENMİŞ VE GÜVENLİ HALE GETİRİLMİŞ EGG ESP FONKSİYONU
     local function PerformScan()
         local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
         if not hrp then return end
-
         local rawFound = {}
         local count = 0
         local descendants = workspace:GetDescendants()
-
         for i = 1, #descendants do
             local obj = descendants[i]
             count = count + 1
             if count % 5000 == 0 then task.wait() end 
-
             if obj and obj.Parent then
                 if obj:IsA("TextLabel") and (obj:FindFirstAncestorWhichIsA("BillboardGui") or obj:FindFirstAncestorWhichIsA("SurfaceGui")) then
                     pcall(function()
@@ -259,17 +255,12 @@ local function LoadMainUI()
                         if txt:find("x") or txt:find("şans") or txt:find("%%") then
                             local rootPart = obj:FindFirstAncestorWhichIsA("BasePart")
                             local model = obj:FindFirstAncestorWhichIsA("Model")
-                            
                             if model == workspace then model = rootPart end
-
                             if rootPart then
                                 table.insert(rawFound, {
-                                    part = rootPart, 
-                                    model = model or rootPart, 
-                                    text = "🥚 " .. obj.Text, 
-                                    color = obj.TextColor3 or Color3.fromRGB(255, 215, 0), 
-                                    pos = rootPart.Position, 
-                                    dist = (rootPart.Position - hrp.Position).Magnitude
+                                    part = rootPart, model = model or rootPart, 
+                                    text = "🥚 " .. obj.Text, color = obj.TextColor3 or Color3.fromRGB(255, 215, 0), 
+                                    pos = rootPart.Position, dist = (rootPart.Position - hrp.Position).Magnitude
                                 })
                             end
                         end
@@ -297,12 +288,8 @@ local function LoadMainUI()
             if highlightCount <= 30 and data.model and data.model ~= workspace then
                 pcall(function()
                     local hl = Instance.new("Highlight")
-                    hl.Name = "F_RoomESP_HL"
-                    hl.FillColor = data.color
-                    hl.OutlineColor = Color3.new(1, 1, 1)
-                    hl.FillTransparency = 0.4
-                    hl.OutlineTransparency = 0.1
-                    hl.Parent = data.model
+                    hl.Name = "F_RoomESP_HL"; hl.FillColor = data.color; hl.OutlineColor = Color3.new(1, 1, 1)
+                    hl.FillTransparency = 0.4; hl.OutlineTransparency = 0.1; hl.Parent = data.model
                     table.insert(FurentESPInstances, hl)
                 end)
             end
@@ -356,7 +343,7 @@ local function LoadMainUI()
         end
     end))
 
-    -- PLAYER MODS
+    -- [2] PLAYER MODS
     local PSettings = { Speed = 16, Jump = 50, Fly = false, FlySpeed = 50, Spider = false }
     CreateToggle(TabPlayer, "Fly (Uçma - WASD/Boşluk)", function(s) PSettings.Fly = s end)
     CreateSlider(TabPlayer, "Fly Hızı", 10, 300, 50, function(val) PSettings.FlySpeed = val end)
@@ -397,13 +384,11 @@ local function LoadMainUI()
         end
     end))
 
-    -- WORLD & TELEPORT
+    -- [3] WORLD & TELEPORT
     CreateSlider(TabWorld, "Yerçekimi (Gravity)", 0, 500, 196, function(val) workspace.Gravity = val end)
     CreateSlider(TabWorld, "Saat (ClockTime)", 0, 24, 14, function(val) Lighting.ClockTime = val end)
     local TargetName = ""
     CreateTextBox(TabTeleport, "Oyuncu Adını Girin...", function(txt) TargetName = string.lower(txt) end)
-    
-    -- YARIM KALAN TELEPORT FONKSİYONUNUN DÜZGÜNCE TAMAMLANMIŞ HALİ
     CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and string.sub(string.lower(p.Name), 1, #TargetName) == TargetName and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then 
@@ -411,6 +396,60 @@ local function LoadMainUI()
                 break
             end
         end
+    end)
+
+    -- ==========================================
+    -- [ EKSİK OLAN SEKMELERİN İÇERİKLERİ EKLENDİ ]
+    -- ==========================================
+
+    -- [4] AUTOFARM SEKMESİ (Temel Şablonlar)
+    local AFSettings = { AutoTap = false, AutoCollect = false, AutoHatch = false }
+    CreateToggle(TabAutoFarm, "Otomatik Tıklama (Auto Tap)", function(s) AFSettings.AutoTap = s end)
+    CreateToggle(TabAutoFarm, "Otomatik Toplama (Auto Collect)", function(s) AFSettings.AutoCollect = s end)
+    CreateToggle(TabAutoFarm, "Otomatik Yumurta Aç (Auto Hatch)", function(s) AFSettings.AutoHatch = s end)
+
+    task.spawn(function()
+        while task.wait(0.1) do
+            if AFSettings.AutoTap then pcall(function() --[[ Auto Tap Mantığı Buraya ]] end) end
+            if AFSettings.AutoCollect then pcall(function() --[[ Auto Collect Mantığı Buraya ]] end) end
+        end
+    end)
+
+    -- [5] SKIN CHANGER SEKMESİ
+    CreateButton(TabSkin, "👻 Görünmez Ol (Invisibility)", function()
+        if LocalPlayer.Character then
+            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = 1
+                elseif v:IsA("Decal") then v.Transparency = 1 end
+            end
+        end
+    end)
+    CreateButton(TabSkin, "✨ Karakteri Parlat (ForceField)", function()
+        if LocalPlayer.Character then
+            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") then v.Material = Enum.Material.ForceField end
+            end
+        end
+    end)
+    CreateButton(TabSkin, "🔄 Görünümü Sıfırla", function()
+        if LocalPlayer.Character then
+            for _, v in pairs(LocalPlayer.Character:GetDescendants()) do
+                if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then 
+                    v.Transparency = 0; v.Material = Enum.Material.Plastic 
+                elseif v:IsA("Decal") then v.Transparency = 0 end
+            end
+        end
+    end)
+
+    -- [6] SETTINGS SEKMESİ
+    CreateColorPicker(TabSettings, "Tema Rengini Değiştir")
+    CreateButton(TabSettings, "🌧️ Yağmur Efektini Aç/Kapat", function()
+        RainEnabled = not RainEnabled
+        RainContainer.Visible = RainEnabled
+    end)
+    CreateButton(TabSettings, "❌ Menüyü Tamamen Kapat (Destroy)", function()
+        ScreenGui:Destroy()
+        if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
     end)
 end
 
