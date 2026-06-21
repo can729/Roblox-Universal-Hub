@@ -1,4 +1,4 @@
--- FURENT_LSC v33.0 - THE ABSOLUTE FINAL EDITION
+-- FURENT_LSC v33.0 - THE ABSOLUTE FINAL EDITION (English + Rain Effect)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
@@ -10,11 +10,11 @@ local LocalPlayer = Players.LocalPlayer
 
 local OWNER_KEY = "FURENT-OWNER-KING"
 local EXPIRE_DATE = os.time({year = 2026, month = 7, day = 12, hour = 23, min = 59, sec = 59})
-local KeysString = "FURENT-A1B2-C3D4,FURENT-E5F6-G7H8,FURENT-I9J0-K1L2" -- Uzun listeyi kısalttım, istersen eskisiyle değiştirebilirsin.
+local KeysString = "FURENT-A1B2-C3D4,FURENT-E5F6-G7H8,FURENT-I9J0-K1L2" 
 local ValidKeys = string.split(KeysString, ",")
 
 _G.ThemeColor = Color3.fromRGB(0, 255, 120)
-_G.ThemeLists = { BGs = {}, Strokes = {}, Toggles = {}, Tabs = {} } -- Canlı renk güncelleme sistemi için liste
+_G.ThemeLists = { BGs = {}, Strokes = {}, Toggles = {}, Tabs = {} } 
 
 if _G.FurentConnections then
     for _, conn in pairs(_G.FurentConnections) do pcall(function() conn:Disconnect() end) end
@@ -43,7 +43,68 @@ local DarkBg = Color3.fromRGB(12, 12, 16)
 local LighterBg = Color3.fromRGB(20, 20, 25)
 
 -- ==========================================
--- [ KEY SİSTEMİ ]
+-- [ RAIN EFFECT SYSTEM ]
+-- ==========================================
+local RainEnabled = true
+local function StartRain(parentFrame)
+    local RainContainer = Instance.new("Frame", parentFrame)
+    RainContainer.Name = "FURENT_Rain"
+    RainContainer.Size = UDim2.new(1, 0, 1, 0)
+    RainContainer.BackgroundTransparency = 1
+    RainContainer.ClipsDescendants = true
+    RainContainer.ZIndex = 1 -- Stays behind the main UI elements
+    
+    task.spawn(function()
+        local rng = Random.new()
+        while task.wait(0.04) do
+            if RainEnabled and parentFrame.Visible and parentFrame.Parent then
+                local drop = Instance.new("Frame", RainContainer)
+                
+                -- Random starting position (wider than frame to account for angle)
+                local startX = rng:NextInteger(-200, parentFrame.AbsoluteSize.X + 200)
+                drop.Position = UDim2.new(0, startX, 0, -50)
+                
+                -- Streak look
+                local length = rng:NextInteger(15, 40)
+                drop.Size = UDim2.new(0, 2, 0, length)
+                drop.BackgroundColor3 = Color3.fromRGB(200, 220, 255)
+                drop.BackgroundTransparency = rng:NextNumber(0.4, 0.8)
+                drop.BorderSizePixel = 0
+                drop.Rotation = 30
+                drop.ZIndex = 1
+
+                Instance.new("UICorner", drop).CornerRadius = UDim.new(1, 0)
+                
+                -- Fading edges like the image provided
+                local grad = Instance.new("UIGradient", drop)
+                grad.Rotation = 90
+                grad.Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(0.5, 0),
+                    NumberSequenceKeypoint.new(1, 1)
+                })
+
+                -- Calculate exact trajectory for a 30-degree angle to prevent sideways sliding
+                local fallDistanceY = parentFrame.AbsoluteSize.Y + 100
+                local fallDistanceX = fallDistanceY * math.tan(math.rad(30))
+                
+                local endX = startX - fallDistanceX
+                local endY = fallDistanceY
+
+                local fallTime = rng:NextNumber(0.3, 0.6)
+                local tween = TweenService:Create(drop, TweenInfo.new(fallTime, Enum.EasingStyle.Linear), {
+                    Position = UDim2.new(0, endX, 0, endY)
+                })
+                
+                tween:Play()
+                tween.Completed:Connect(function() drop:Destroy() end)
+            end
+        end
+    end)
+end
+
+-- ==========================================
+-- [ KEY SYSTEM ]
 -- ==========================================
 local KeyFrame = Instance.new("Frame", ScreenGui)
 KeyFrame.Size = UDim2.new(0, 400, 0, 250); KeyFrame.Position = UDim2.new(0.5, -200, 0.5, -125)
@@ -51,27 +112,29 @@ KeyFrame.BackgroundColor3 = DarkBg; KeyFrame.BackgroundTransparency = 0.05
 Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 12)
 local KeyStroke = Instance.new("UIStroke", KeyFrame); KeyStroke.Color = _G.ThemeColor; KeyStroke.Thickness = 2; KeyStroke.Transparency = 0.2
 
+StartRain(KeyFrame) -- Apply rain to Login screen
+
 local KeyScale = Instance.new("UIScale", KeyFrame)
 KeyScale.Scale = 0.8; TweenService:Create(KeyScale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
 local KeyTitle = Instance.new("TextLabel", KeyFrame)
 KeyTitle.Size = UDim2.new(1, 0, 0, 50); KeyTitle.Position = UDim2.new(0, 0, 0, 10)
-KeyTitle.Text = "FURENT LSC - LOGIN"; KeyTitle.TextColor3 = _G.ThemeColor; KeyTitle.Font = Enum.Font.GothamBlack; KeyTitle.TextSize = 24; KeyTitle.BackgroundTransparency = 1
+KeyTitle.Text = "FURENT LSC - LOGIN"; KeyTitle.TextColor3 = _G.ThemeColor; KeyTitle.Font = Enum.Font.GothamBlack; KeyTitle.TextSize = 24; KeyTitle.BackgroundTransparency = 1; KeyTitle.ZIndex = 2
 
 local KeyInput = Instance.new("TextBox", KeyFrame)
 KeyInput.Size = UDim2.new(1, -40, 0, 45); KeyInput.Position = UDim2.new(0, 20, 0, 70)
-KeyInput.BackgroundColor3 = LighterBg; KeyInput.PlaceholderText = "Anahtarı (Key) Buraya Girin..."
-KeyInput.Text = ""; KeyInput.TextColor3 = Color3.new(1,1,1); KeyInput.Font = Enum.Font.Gotham; KeyInput.TextSize = 14
+KeyInput.BackgroundColor3 = LighterBg; KeyInput.PlaceholderText = "Enter Key Here..."
+KeyInput.Text = ""; KeyInput.TextColor3 = Color3.new(1,1,1); KeyInput.Font = Enum.Font.Gotham; KeyInput.TextSize = 14; KeyInput.ZIndex = 2
 Instance.new("UICorner", KeyInput).CornerRadius = UDim.new(0, 6)
 Instance.new("UIStroke", KeyInput).Color = Color3.fromRGB(50,50,60)
 
 local VerifyBtn = Instance.new("TextButton", KeyFrame)
 VerifyBtn.Size = UDim2.new(1, -40, 0, 45); VerifyBtn.Position = UDim2.new(0, 20, 0, 130)
-VerifyBtn.BackgroundColor3 = _G.ThemeColor; VerifyBtn.Text = "GİRİŞ YAP"; VerifyBtn.TextColor3 = Color3.new(0,0,0); VerifyBtn.Font = Enum.Font.GothamBold; VerifyBtn.TextSize = 16
+VerifyBtn.BackgroundColor3 = _G.ThemeColor; VerifyBtn.Text = "LOGIN"; VerifyBtn.TextColor3 = Color3.new(0,0,0); VerifyBtn.Font = Enum.Font.GothamBold; VerifyBtn.TextSize = 16; VerifyBtn.ZIndex = 2
 Instance.new("UICorner", VerifyBtn).CornerRadius = UDim.new(0, 6)
 
 -- ==========================================
--- [ ANA MENÜ ]
+-- [ MAIN MENU ]
 -- ==========================================
 local function LoadMainUI()
     local Main = Instance.new("Frame", ScreenGui)
@@ -81,10 +144,11 @@ local function LoadMainUI()
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
     local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = _G.ThemeColor; MainStroke.Thickness = 2; MainStroke.Transparency = 0.2
 
+    StartRain(Main) -- Apply rain to Main Menu
+
     local MenuScale = Instance.new("UIScale", Main); MenuScale.Scale = 0.8
     TweenService:Create(MenuScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
-    -- MENÜ GİZLEME TUŞ SİSTEMİ (Varsayılan: RightControl)
     local MenuKeybind = Enum.KeyCode.RightControl
     AddConnection(UserInputService.InputBegan:Connect(function(input, gp)
         if not gp and input.KeyCode == MenuKeybind then
@@ -108,31 +172,30 @@ local function LoadMainUI()
         end
     end)
 
-    -- [YENİ] AVATAR VE OYUN SÜRESİ PANELİ
     local UserInfoFrame = Instance.new("Frame", Sidebar)
     UserInfoFrame.Size = UDim2.new(1, -20, 0, 50); UserInfoFrame.Position = UDim2.new(0, 10, 1, -60)
-    UserInfoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25); UserInfoFrame.BackgroundTransparency = 0.2
+    UserInfoFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25); UserInfoFrame.BackgroundTransparency = 0.2; UserInfoFrame.ZIndex = 3
     Instance.new("UICorner", UserInfoFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", UserInfoFrame).Color = Color3.fromRGB(50,50,60)
     
     local Avatar = Instance.new("ImageLabel", UserInfoFrame)
     Avatar.Size = UDim2.new(0, 36, 0, 36); Avatar.Position = UDim2.new(0, 7, 0, 7)
     Avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"
-    Avatar.BackgroundTransparency = 1; Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
+    Avatar.BackgroundTransparency = 1; Avatar.ZIndex = 3; Instance.new("UICorner", Avatar).CornerRadius = UDim.new(1, 0)
     
     local NameLbl = Instance.new("TextLabel", UserInfoFrame)
     NameLbl.Size = UDim2.new(1, -50, 0, 20); NameLbl.Position = UDim2.new(0, 50, 0, 5)
-    NameLbl.Text = LocalPlayer.Name; NameLbl.TextColor3 = Color3.new(1,1,1); NameLbl.Font = Enum.Font.GothamBold; NameLbl.TextSize = 12; NameLbl.TextXAlignment = Enum.TextXAlignment.Left; NameLbl.BackgroundTransparency = 1
+    NameLbl.Text = LocalPlayer.Name; NameLbl.TextColor3 = Color3.new(1,1,1); NameLbl.Font = Enum.Font.GothamBold; NameLbl.TextSize = 12; NameLbl.TextXAlignment = Enum.TextXAlignment.Left; NameLbl.BackgroundTransparency = 1; NameLbl.ZIndex = 3
 
     local TimeLbl = Instance.new("TextLabel", UserInfoFrame)
     TimeLbl.Size = UDim2.new(1, -50, 0, 20); TimeLbl.Position = UDim2.new(0, 50, 0, 25)
-    TimeLbl.Text = "00:00"; TimeLbl.TextColor3 = Color3.fromRGB(150, 150, 150); TimeLbl.Font = Enum.Font.Gotham; TimeLbl.TextSize = 11; TimeLbl.TextXAlignment = Enum.TextXAlignment.Left; TimeLbl.BackgroundTransparency = 1
+    TimeLbl.Text = "00:00"; TimeLbl.TextColor3 = Color3.fromRGB(150, 150, 150); TimeLbl.Font = Enum.Font.Gotham; TimeLbl.TextSize = 11; TimeLbl.TextXAlignment = Enum.TextXAlignment.Left; TimeLbl.BackgroundTransparency = 1; TimeLbl.ZIndex = 3
     
     local SessionStart = os.time()
     task.spawn(function()
         while task.wait(1) do
             if TimeLbl then
                 local s = os.time() - SessionStart
-                TimeLbl.Text = string.format("Süre: %02d:%02d", math.floor(s/60), s%60)
+                TimeLbl.Text = string.format("Time: %02d:%02d", math.floor(s/60), s%60)
             else break end
         end
     end)
@@ -140,7 +203,6 @@ local function LoadMainUI()
     local TabContainer = Instance.new("Frame", Main)
     TabContainer.Size = UDim2.new(1, -190, 1, -20); TabContainer.Position = UDim2.new(0, 190, 0, 10); TabContainer.BackgroundTransparency = 1; TabContainer.ZIndex = 2
 
-    -- UI OLUŞTURMA FONKSİYONLARI VE CANLI RENK DESTEĞİ
     local function CreateTab(iconText, yPos, isActiveDefault)
         local TabBtn = Instance.new("TextButton", Sidebar); TabBtn.Size = UDim2.new(0, 160, 0, 36); TabBtn.Position = UDim2.new(0, 10, 0, yPos); TabBtn.Text = "  " .. iconText; TabBtn.TextColor3 = isActiveDefault and Color3.new(1,1,1) or Color3.fromRGB(150,150,150); TabBtn.BackgroundColor3 = isActiveDefault and _G.ThemeColor or Color3.fromRGB(15, 15, 20); TabBtn.BackgroundTransparency = isActiveDefault and 0.5 or 0.2; TabBtn.Font = Enum.Font.GothamBold; TabBtn.TextSize = 14; TabBtn.TextXAlignment = Enum.TextXAlignment.Left; TabBtn.ZIndex = 3
         Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 6)
@@ -161,12 +223,13 @@ local function LoadMainUI()
         return TabPage
     end
 
-    local function CreateToggle(parent, text, callback)
+    local function CreateToggle(parent, text, defaultState, callback)
         local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 45); Container.BackgroundColor3 = LighterBg; Container.BackgroundTransparency = 0.2; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(50,50,60)
         local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(0.8, 0, 1, 0); Label.Position = UDim2.new(0, 15, 0, 0); Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
-        local ToggleBtn = Instance.new("TextButton", Container); ToggleBtn.Size = UDim2.new(0, 44, 0, 22); ToggleBtn.Position = UDim2.new(1, -60, 0.5, -11); ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60); ToggleBtn.Text = ""; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
+        local ToggleBtn = Instance.new("TextButton", Container); ToggleBtn.Size = UDim2.new(0, 44, 0, 22); ToggleBtn.Position = UDim2.new(1, -60, 0.5, -11); ToggleBtn.Text = ""; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
         
-        local toggleData = {btn = ToggleBtn, state = false}
+        local toggleData = {btn = ToggleBtn, state = defaultState}
+        ToggleBtn.BackgroundColor3 = toggleData.state and _G.ThemeColor or Color3.fromRGB(50, 50, 60)
         table.insert(_G.ThemeLists.Toggles, toggleData)
 
         ToggleBtn.MouseButton1Click:Connect(function() 
@@ -174,6 +237,9 @@ local function LoadMainUI()
             TweenService:Create(ToggleBtn, TweenInfo.new(0.3), {BackgroundColor3 = toggleData.state and _G.ThemeColor or Color3.fromRGB(50, 50, 60)}):Play(); 
             task.spawn(function() pcall(callback, toggleData.state) end) 
         end)
+        
+        -- Run the callback initially with the default state
+        task.spawn(function() pcall(callback, toggleData.state) end)
     end
 
     local function CreateButton(parent, text, callback)
@@ -187,7 +253,6 @@ local function LoadMainUI()
             local btnTween = TweenService:Create(Btn, TweenInfo.new(0.1), {Size = UDim2.new(1, -25, 0, 40), Position = UDim2.new(0, 5, 0, 2)}); btnTween:Play(); btnTween.Completed:Wait(); TweenService:Create(Btn, TweenInfo.new(0.1), {Size = UDim2.new(1, -15, 0, 45), Position = UDim2.new(0, 0, 0, 0)}):Play()
             task.spawn(function() pcall(callback) end) 
         end)
-        return Btn -- Buton objesini manipüle edebilmek için return eklendi.
     end
 
     local function CreateSlider(parent, text, min, max, default, callback)
@@ -212,7 +277,6 @@ local function LoadMainUI()
         TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
     end
 
-    -- [YENİ] KLAVYE TUŞ ATAMA BUTONU OLUŞTURUCU
     local function CreateKeybind(parent, text, defaultKey, callback)
         local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 45); Container.BackgroundColor3 = LighterBg; Container.BackgroundTransparency = 0.2; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(50,50,60)
         local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(0.8, 0, 1, 0); Label.Position = UDim2.new(0, 15, 0, 0); Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
@@ -220,7 +284,7 @@ local function LoadMainUI()
         
         local listening = false
         BindBtn.MouseButton1Click:Connect(function()
-            listening = true; BindBtn.Text = "Tuşa Bas..."
+            listening = true; BindBtn.Text = "Press Key..."
             TweenService:Create(BindBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(100, 50, 50)}):Play()
         end)
         
@@ -233,7 +297,6 @@ local function LoadMainUI()
         end))
     end
 
-    -- [YENİ] CANLI RENK GÜNCELLEYİCİ
     local function CreateColorPicker(parent, text)
         local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 110); Container.BackgroundColor3 = LighterBg; Container.BackgroundTransparency = 0.2; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(50, 50, 60)
         local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(1, -60, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10); Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
@@ -243,7 +306,6 @@ local function LoadMainUI()
         local function UpdateColor() 
             _G.ThemeColor = Color3.fromRGB(currentColor.R, currentColor.G, currentColor.B)
             TweenService:Create(PreviewBox, TweenInfo.new(0.2), {BackgroundColor3 = _G.ThemeColor}):Play() 
-            -- Diğer her şeyi canlı güncelle
             for _, bg in ipairs(_G.ThemeLists.BGs) do pcall(function() bg.BackgroundColor3 = _G.ThemeColor end) end
             for _, strk in ipairs(_G.ThemeLists.Strokes) do pcall(function() strk.Color = _G.ThemeColor end) end
             for _, tog in ipairs(_G.ThemeLists.Toggles) do if tog.state then pcall(function() tog.btn.BackgroundColor3 = _G.ThemeColor end) end end
@@ -269,7 +331,7 @@ local function LoadMainUI()
     local TabSkin       = CreateTab("🎭 Skin Changer", 280, false)
     local TabSettings   = CreateTab("⚙️ Settings", 320, false)
 
-    -- [1] VISUALS (Öncekiyle aynı çalışan kusursuz hal)
+    -- [1] VISUALS
     local VSettings = { Box = false, Tracer = false, RoomESP = false, Chams = false }
     local FurentESPInstances = {}
 
@@ -317,11 +379,11 @@ local function LoadMainUI()
     local isScanning = false; local lastScanTick = 0
     task.spawn(function() while task.wait(1) do if VSettings.RoomESP and not isScanning then if tick() - lastScanTick >= 30 then isScanning = true; pcall(PerformScan); lastScanTick = tick(); isScanning = false end end end end)
 
-    CreateToggle(TabVisuals, "2D Box ESP", function(s) VSettings.Box = s end)
-    CreateToggle(TabVisuals, "Tracer ESP", function(s) VSettings.Tracer = s end)
-    CreateToggle(TabVisuals, "Chams ESP", function(s) VSettings.Chams = s end)
-    CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then lastScanTick = tick(); if not isScanning then isScanning = true; task.spawn(function() pcall(PerformScan); isScanning = false end) end else ClearRoomESP() end end)
-    CreateButton(TabVisuals, "🔄 ESP Yazılarını Yenile", function() if not isScanning then isScanning = true; lastScanTick = tick(); pcall(PerformScan); isScanning = false end end)
+    CreateToggle(TabVisuals, "2D Box ESP", false, function(s) VSettings.Box = s end)
+    CreateToggle(TabVisuals, "Tracer ESP", false, function(s) VSettings.Tracer = s end)
+    CreateToggle(TabVisuals, "Chams ESP", false, function(s) VSettings.Chams = s end)
+    CreateToggle(TabVisuals, "Egg & Password ESP (In-Room)", false, function(s) VSettings.RoomESP = s; if s then lastScanTick = tick(); if not isScanning then isScanning = true; task.spawn(function() pcall(PerformScan); isScanning = false end) end else ClearRoomESP() end end)
+    CreateButton(TabVisuals, "🔄 Refresh ESP Texts", function() if not isScanning then isScanning = true; lastScanTick = tick(); pcall(PerformScan); isScanning = false end end)
 
     local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
     local ESP_Boxes = {}; local ESP_Lines = {}
@@ -354,9 +416,9 @@ local function LoadMainUI()
 
     -- [2] PLAYER
     local PSettings = { Speed = 16, Jump = 50, Fly = false, FlySpeed = 50, Spider = false }
-    CreateToggle(TabPlayer, "Fly (Uçma)", function(s) PSettings.Fly = s end)
-    CreateSlider(TabPlayer, "Fly Hızı", 10, 300, 50, function(val) PSettings.FlySpeed = val end)
-    CreateToggle(TabPlayer, "Spider (Duvara Tırmanma)", function(s) PSettings.Spider = s end)
+    CreateToggle(TabPlayer, "Fly", false, function(s) PSettings.Fly = s end)
+    CreateSlider(TabPlayer, "Fly Speed", 10, 300, 50, function(val) PSettings.FlySpeed = val end)
+    CreateToggle(TabPlayer, "Spider (Climb Walls)", false, function(s) PSettings.Spider = s end)
     CreateSlider(TabPlayer, "Walk Speed", 16, 300, 16, function(val) PSettings.Speed = val end)
     CreateSlider(TabPlayer, "Jump Power", 50, 400, 50, function(val) PSettings.Jump = val end)
     task.spawn(function() while task.wait(0.1) do local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid"); if hum and not PSettings.Fly then hum.WalkSpeed = PSettings.Speed; hum.JumpPower = PSettings.Jump end end end)
@@ -381,67 +443,54 @@ local function LoadMainUI()
     end))
 
     -- [3] WORLD & TELEPORT
-    CreateSlider(TabWorld, "Yerçekimi", 0, 500, 196, function(val) workspace.Gravity = val end)
-    CreateSlider(TabWorld, "Saat (Zaman)", 0, 24, 14, function(val) Lighting.ClockTime = val end)
+    CreateSlider(TabWorld, "Gravity", 0, 500, 196, function(val) workspace.Gravity = val end)
+    CreateSlider(TabWorld, "Time (Clock)", 0, 24, 14, function(val) Lighting.ClockTime = val end)
     local TargetName = ""
-    CreateTextBox(TabTeleport, "Işınlanılacak Oyuncu...", function(txt) TargetName = string.lower(txt) end)
-    CreateButton(TabTeleport, "Işınlan", function() for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and string.sub(string.lower(p.Name), 1, #TargetName) == TargetName and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3); break end end end)
+    CreateTextBox(TabTeleport, "Player to Teleport...", function(txt) TargetName = string.lower(txt) end)
+    CreateButton(TabTeleport, "Teleport", function() for _, p in ipairs(Players:GetPlayers()) do if p ~= LocalPlayer and string.sub(string.lower(p.Name), 1, #TargetName) == TargetName and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3); break end end end)
 
     -- [4] AUTOFARM
-    CreateToggle(TabAutoFarm, "Otomatik Tıklama", function(s) end)
-    CreateToggle(TabAutoFarm, "Otomatik Toplama", function(s) end)
-    CreateToggle(TabAutoFarm, "Otomatik Yumurta", function(s) end)
+    CreateToggle(TabAutoFarm, "Auto Click", false, function(s) end)
+    CreateToggle(TabAutoFarm, "Auto Collect", false, function(s) end)
+    CreateToggle(TabAutoFarm, "Auto Egg", false, function(s) end)
 
     -- [5] SKIN CHANGER
-    CreateButton(TabSkin, "👻 Görünmez Ol (Invisibility)", function() if LocalPlayer.Character then for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = 1 elseif v:IsA("Decal") then v.Transparency = 1 end end end end)
-    CreateButton(TabSkin, "✨ Parlat (ForceField)", function() if LocalPlayer.Character then for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.Material = Enum.Material.ForceField end end end end)
-    CreateButton(TabSkin, "🔄 Karakteri Sıfırla", function() if LocalPlayer.Character then for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = 0; v.Material = Enum.Material.Plastic elseif v:IsA("Decal") then v.Transparency = 0 end end end end)
+    CreateButton(TabSkin, "👻 Become Invisible", function() if LocalPlayer.Character then for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = 1 elseif v:IsA("Decal") then v.Transparency = 1 end end end end)
+    CreateButton(TabSkin, "✨ ForceField", function() if LocalPlayer.Character then for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") then v.Material = Enum.Material.ForceField end end end end)
+    CreateButton(TabSkin, "🔄 Reset Character", function() if LocalPlayer.Character then for _, v in pairs(LocalPlayer.Character:GetDescendants()) do if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then v.Transparency = 0; v.Material = Enum.Material.Plastic elseif v:IsA("Decal") then v.Transparency = 0 end end end end)
 
-    -- [6] SETTINGS (EKSİKSİZ VE CANLI)
-    CreateColorPicker(TabSettings, "Arayüz Rengini Ayarla")
+    -- [6] SETTINGS
+    CreateColorPicker(TabSettings, "Set UI Color")
     
-    CreateKeybind(TabSettings, "Menü Aç/Kapat Tuşu (Gizle)", MenuKeybind, function(newKey)
+    CreateToggle(TabSettings, "Toggle UI Rain Effect", true, function(s) RainEnabled = s end)
+
+    CreateKeybind(TabSettings, "Toggle Menu Key (Hide)", MenuKeybind, function(newKey)
         MenuKeybind = newKey
     end)
     
-    -- [YENİ] DISCORD JOIN BUTONU
-    local DiscordBtn
-    DiscordBtn = CreateButton(TabSettings, "💬 DC JOIN", function()
-        if setclipboard then
-            setclipboard("https://discord.gg/fs28GEBuSX")
-        elseif toclipboard then
-            toclipboard("https://discord.gg/fs28GEBuSX")
-        end
-        if DiscordBtn then
-            DiscordBtn.Text = "🔗 LİNK KOPYALANDI! (Google'a Yapıştırın)"
-            task.wait(3)
-            DiscordBtn.Text = "💬 DC JOIN"
-        end
-    end)
-
-    CreateButton(TabSettings, "❌ Arayüzü Tamamen Sil (Destroy)", function()
+    CreateButton(TabSettings, "❌ Destroy UI Completely", function()
         ScreenGui:Destroy()
         if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
     end)
 end
 
 -- ==========================================
--- [ GİRİŞ SİSTEMİ BAŞLATICI ]
+-- [ LOGIN SYSTEM INITIALIZER ]
 -- ==========================================
 VerifyBtn.MouseButton1Click:Connect(function()
-    if os.time() > EXPIRE_DATE then VerifyBtn.Text = "SÜRE DOLDU!"; TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(200, 0, 0)}):Play(); return end
+    if os.time() > EXPIRE_DATE then VerifyBtn.Text = "EXPIRED!"; TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(200, 0, 0)}):Play(); return end
     local isValid = false
     if KeyInput.Text == OWNER_KEY then isValid = true else for _, key in ipairs(ValidKeys) do if key == KeyInput.Text then isValid = true; break end end end
     
     if isValid then
-        VerifyBtn.Text = "GİRİŞ BAŞARILI!"; TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 255, 120)}):Play(); task.wait(0.6)
+        VerifyBtn.Text = "LOGIN SUCCESSFUL!"; TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 255, 120)}):Play(); task.wait(0.6)
         local closeTween = TweenService:Create(KeyScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}); closeTween:Play(); closeTween.Completed:Wait()
         KeyFrame.Visible = false; if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
         LoadMainUI()
     else
-        VerifyBtn.Text = "HATALI ANAHTAR!"; TweenService:Create(VerifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 50, 50)}):Play()
+        VerifyBtn.Text = "INVALID KEY!"; TweenService:Create(VerifyBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 50, 50)}):Play()
         local originalPos = KeyFrame.Position
         for i = 1, 6 do KeyFrame.Position = originalPos + UDim2.new(0, math.random(-8, 8), 0, math.random(-8, 8)); task.wait(0.04) end
-        KeyFrame.Position = originalPos; task.wait(1); VerifyBtn.Text = "GİRİŞ YAP"; TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = _G.ThemeColor}):Play()
+        KeyFrame.Position = originalPos; task.wait(1); VerifyBtn.Text = "LOGIN"; TweenService:Create(VerifyBtn, TweenInfo.new(0.3), {BackgroundColor3 = _G.ThemeColor}):Play()
     end
 end)
