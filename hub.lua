@@ -1,4 +1,4 @@
--- FURENT_LSC v29.0 - PRO MAX EDITION (No-Flicker ESP, AutoFarm & SkinChanger Pro)
+-- FURENT_LSC v30.0 - ULTIMATE EDITION (Anında ESP, Parlayan Yumurtalar, 30sn Döngü)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -26,7 +26,7 @@ pcall(function()
     if oldTarget and oldTarget:FindFirstChild("FURENT_PRO_UI") then oldTarget.FURENT_PRO_UI:Destroy() end
     if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FURENT_PRO_UI") then LocalPlayer.PlayerGui.FURENT_PRO_UI:Destroy() end
     if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
-    for _, v in pairs(workspace:GetDescendants()) do if v.Name == "F_RoomESP" then v:Destroy() end end
+    for _, v in pairs(workspace:GetDescendants()) do if v.Name == "F_RoomESP" or v.Name == "F_RoomESP_HL" then v:Destroy() end end
 end)
 
 -- [2] KURŞUN GEÇİRMEZ GUI HEDEFİ
@@ -63,12 +63,8 @@ MenuScale.Scale = 0.8
 TweenService:Create(MenuScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
 local function AddHoverEffect(guiObject, baseColor, hoverColor, transparencyBase, transparencyHover)
-    guiObject.MouseEnter:Connect(function()
-        TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = hoverColor, BackgroundTransparency = transparencyHover or 0}):Play()
-    end)
-    guiObject.MouseLeave:Connect(function()
-        TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = baseColor, BackgroundTransparency = transparencyBase or 0}):Play()
-    end)
+    guiObject.MouseEnter:Connect(function() TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = hoverColor, BackgroundTransparency = transparencyHover or 0}):Play() end)
+    guiObject.MouseLeave:Connect(function() TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = baseColor, BackgroundTransparency = transparencyBase or 0}):Play() end)
 end
 
 -- [4] KUSURSUZ YAĞMUR EFEKTİ
@@ -281,92 +277,161 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [8] VISUALS (TAMAMEN KIRPIŞMASIZ ESP)
+-- [8] VISUALS (ANINDA ESP, 30SN DÖNGÜ VE PARLAYAN YUMURTALAR)
 local VSettings = { Box = false, Tracer = false, RoomESP = false, Chams = false }
+local FurentESPInstances = {}
 
 local function ClearRoomESP()
-    for _, obj in ipairs(workspace:GetDescendants()) do if obj.Name == "F_RoomESP" then obj:Destroy() end end
+    for _, inst in ipairs(FurentESPInstances) do
+        pcall(function() if inst then inst:Destroy() end end)
+    end
+    table.clear(FurentESPInstances)
 end
 
-local function CreateBillboard(parent, text, color, offset)
-    local bgui = Instance.new("BillboardGui", parent)
-    bgui.Name = "F_RoomESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 250, 0, 50); bgui.StudsOffset = offset or Vector3.new(0, 5, 0)
-    local lbl = Instance.new("TextLabel", bgui)
-    lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1; lbl.Text = text; lbl.TextColor3 = color
-    lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 16; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
-end
-
--- FIX: Arka Planda tarama yapıp, ekranı salisesinde güncelleyen Anti-Flicker sistemi
-local function UpdateRoomESP()
-    if not VSettings.RoomESP then ClearRoomESP(); return end
+-- ZERO-LAG ANINDA TARAYICI
+local function PerformScan()
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    local count = 0
+    local newESPData = {}
     local processed = {}
-    local newESPData = {} -- Önce tarama verilerini bu tabloda biriktiriyoruz (Kırpışmayı önler)
+    local count = 0
 
     for _, obj in ipairs(workspace:GetDescendants()) do
         count = count + 1
-        if count % 300 == 0 then task.wait() end -- Arka planda donmayı engeller
+        -- 5000 Batch limiti: Oyunu dondurmadan ANINDA (0 gecikme ile) tarar
+        if count % 5000 == 0 then task.wait() end 
 
         if obj:IsA("TextLabel") or obj:IsA("TextButton") then
             local txt = string.lower(obj.Text)
+            -- Görselindeki gibi "x", "Şans" veya "%" arar
             if txt:find("x") or txt:find("şans") or txt:find("%%") then
                 local rootPart = obj:FindFirstAncestorWhichIsA("BasePart")
-                if rootPart and not processed[rootPart] then
-                    if (rootPart.Position - hrp.Position).Magnitude < 400 then
-                        processed[rootPart] = true
-                        table.insert(newESPData, {part = rootPart, text = "🥚 " .. obj.Text, color = obj.TextColor3, offset = Vector3.new(0, 5, 0)})
-                    end
+                local model = obj:FindFirstAncestorWhichIsA("Model")
+                
+                -- Odanın/Yumurtanın parlaması için Model'i ana hedef yapıyoruz
+                local targetHighlight = model or rootPart
+                local targetUI = rootPart
+
+                if targetUI and not processed[targetUI] then
+                    processed[targetUI] = true
+                    table.insert(newESPData, {
+                        type = "Egg",
+                        uiTarget = targetUI,
+                        hlTarget = targetHighlight,
+                        text = "🥚 " .. obj.Text,
+                        color = obj.TextColor3 or Color3.fromRGB(255, 215, 0)
+                    })
                 end
             end
-        end
-
-        if obj:IsA("ProximityPrompt") or obj:IsA("ClickDetector") then
+        elseif obj:IsA("ProximityPrompt") or obj:IsA("ClickDetector") then
             local rootPart = obj.Parent
             if rootPart and rootPart:IsA("BasePart") and not processed[rootPart] then
-                if (rootPart.Position - hrp.Position).Magnitude < 400 then
-                    local nameL = string.lower(rootPart.Name)
-                    local orderNum = rootPart:GetAttribute("Order") or rootPart:GetAttribute("Index") or rootPart:GetAttribute("Value")
-                    
-                    if not orderNum then
-                        local val = rootPart:FindFirstChild("Order") or rootPart:FindFirstChild("Index")
-                        if val and (val:IsA("NumberValue") or val:IsA("IntValue")) then orderNum = val.Value end
-                    end
+                local nameL = string.lower(rootPart.Name)
+                local orderNum = rootPart:GetAttribute("Order") or rootPart:GetAttribute("Index") or rootPart:GetAttribute("Value")
+                if not orderNum then
+                    local val = rootPart:FindFirstChild("Order") or rootPart:FindFirstChild("Index")
+                    if val and (val:IsA("NumberValue") or val:IsA("IntValue")) then orderNum = val.Value end
+                end
 
-                    if orderNum or nameL:find("button") or nameL:find("puzzle") then
-                        processed[rootPart] = true
-                        local pText = orderNum and ("🎯 TIKLA! SIRA: " .. tostring(orderNum)) or "🔘 Buton"
-                        table.insert(newESPData, {part = rootPart, text = pText, color = rootPart.Color, offset = Vector3.new(0, 3, 0)})
-                    end
+                if orderNum or nameL:find("button") or nameL:find("puzzle") then
+                    processed[rootPart] = true
+                    local pText = orderNum and ("🎯 TIKLA! SIRA: " .. tostring(orderNum)) or "🔘 Buton"
+                    table.insert(newESPData, {
+                        type = "Puzzle",
+                        uiTarget = rootPart,
+                        hlTarget = rootPart.Parent:IsA("Model") and rootPart.Parent or rootPart,
+                        text = pText,
+                        color = rootPart.Color
+                    })
                 end
             end
         end
     end
 
-    -- TARAMA BİTTİKTEN SONRA TEK BİR KAREDE EKRANI YENİLE (Gelip Gitme Sorunu Bitti)
     ClearRoomESP()
+    
     for _, data in ipairs(newESPData) do
-        CreateBillboard(data.part, data.text, data.color, data.offset)
+        -- 1. EKRANDAKİ BÜYÜK YAZI
+        local bgui = Instance.new("BillboardGui")
+        bgui.Name = "F_RoomESP"
+        bgui.AlwaysOnTop = true
+        bgui.Size = UDim2.new(0, 250, 0, 50)
+        bgui.StudsOffset = data.type == "Egg" and Vector3.new(0, 6, 0) or Vector3.new(0, 3, 0)
+        
+        local lbl = Instance.new("TextLabel", bgui)
+        lbl.Size = UDim2.new(1, 0, 1, 0)
+        lbl.BackgroundTransparency = 1
+        lbl.Text = data.text
+        lbl.TextColor3 = data.color
+        lbl.Font = Enum.Font.GothamBlack
+        lbl.TextSize = 18
+        lbl.TextStrokeTransparency = 0
+        lbl.TextStrokeColor3 = Color3.new(0,0,0)
+        bgui.Parent = data.uiTarget
+        table.insert(FurentESPInstances, bgui)
+
+        -- 2. ETRAFI YANMA (Parlayan ODA/YUMURTA)
+        if data.hlTarget then
+            local hl = Instance.new("Highlight")
+            hl.Name = "F_RoomESP_HL"
+            hl.FillColor = data.color
+            hl.OutlineColor = Color3.new(1, 1, 1)
+            hl.FillTransparency = 0.4 -- Renkli parlamayı sağlar
+            hl.OutlineTransparency = 0.1 -- Çizgi hatlarını belirginleştirir
+            hl.Parent = data.hlTarget
+            table.insert(FurentESPInstances, hl)
+        end
     end
 end
 
+-- 30 Saniyelik Otomatik Döngü Sistemi
 local isScanning = false
+local lastScanTick = 0
+
 task.spawn(function()
-    while true do
-        task.wait(1.5) 
+    while task.wait(1) do
         if VSettings.RoomESP and not isScanning then 
-            isScanning = true; pcall(UpdateRoomESP); isScanning = false
+            -- Eğer son taramanın üstünden 30 saniye geçtiyse tekrar tara
+            if tick() - lastScanTick >= 30 then
+                isScanning = true
+                pcall(PerformScan)
+                lastScanTick = tick()
+                isScanning = false
+            end
         end
     end
 end)
 
 CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
-CreateToggle(TabVisuals, "Chams (Duvar Arkası Renk)", function(s) VSettings.Chams = s end)
-CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then pcall(UpdateRoomESP) else ClearRoomESP() end end)
-CreateButton(TabVisuals, "🔄 ESP Yazılarını Anında Yenile", function() if not isScanning then isScanning = true; pcall(UpdateRoomESP); isScanning = false end end)
+CreateToggle(TabVisuals, "Chams (Oyuncu Parla)", function(s) VSettings.Chams = s end)
+
+CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) 
+    VSettings.RoomESP = s
+    if s then
+        -- Toggle açıldığı "AN" hiç beklemeden 0. saniyede hemen tarama yapar!
+        lastScanTick = tick()
+        if not isScanning then
+            isScanning = true
+            task.spawn(function()
+                pcall(PerformScan)
+                isScanning = false
+            end)
+        end
+    else
+        ClearRoomESP()
+    end
+end)
+
+CreateButton(TabVisuals, "🔄 ESP Yazılarını Anında Yenile", function() 
+    if not isScanning then 
+        isScanning = true
+        lastScanTick = tick()
+        pcall(PerformScan)
+        isScanning = false 
+    end 
+end)
 
 local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
 local ESP_Boxes = {}; local ESP_Lines = {}
@@ -462,7 +527,7 @@ CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
     end
 end)
 
--- [11] AUTOFARM (YENİDEN EKLENDİ VE GELİŞTİRİLDİ)
+-- [11] AUTOFARM
 local AutoTapOn = false
 CreateToggle(TabAutoFarm, "Auto Clicker (Hızlı Tıklama)", function(state)
     AutoTapOn = state
@@ -574,4 +639,4 @@ AddConnection(UserInputService.InputBegan:Connect(function(input)
     end
 end))
 
-print("FURENT_LSC v29.0 PRO MAX YÜKLENDİ - ESP FİXLENDİ, AUTOFARM GELDİ!")
+print("FURENT_LSC v30.0 ULTIMATE YÜKLENDİ - SIFIR GECİKME, GLOW EFEKTİ & 30SN LOOP!")
