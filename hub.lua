@@ -1,4 +1,4 @@
--- FURENT_LSC v25.0 - VIP EDITION (Zero Lag, Distance Filter, Modern UI)
+-- FURENT_LSC v25.0 - VIP EDITION (Eğitimsel Optimizasyon Sürümü)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,7 +8,17 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- [1] ESKİ KALINTILARI TEMİZLE (Spamları Yok Et)
+-- [0] BAĞLANTI (CONNECTION) TEMİZLİĞİ - LAG ÖNLEYİCİ
+-- Script her çalıştığında önceki döngüleri durdurur
+if _G.FurentConnections then
+    for _, conn in pairs(_G.FurentConnections) do
+        pcall(function() conn:Disconnect() end)
+    end
+end
+_G.FurentConnections = {}
+local function AddConnection(conn) table.insert(_G.FurentConnections, conn) end
+
+-- [1] ESKİ KALINTILARI TEMİZLE
 local TargetGui = nil
 pcall(function() TargetGui = (gethui and gethui()) or game:GetService("CoreGui") end)
 if not TargetGui or not pcall(function() local _ = TargetGui.Name end) then TargetGui = LocalPlayer:WaitForChild("PlayerGui") end
@@ -21,7 +31,7 @@ pcall(function()
     end
 end)
 
--- [2] ÇAĞ ATLAYAN MODERN ANA ARAYÜZ
+-- [2] MODERN ANA ARAYÜZ (UI)
 local Blur = Instance.new("BlurEffect")
 Blur.Name = "FURENT_Blur"; Blur.Size = 15; Blur.Enabled = true
 pcall(function() Blur.Parent = Lighting end)
@@ -30,7 +40,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "FURENT_PRO_UI"; ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = TargetGui
 
-local MainGreen = Color3.fromRGB(0, 255, 120) -- Daha parlak neon yeşil
+local MainGreen = Color3.fromRGB(0, 255, 120)
 local DarkBg = Color3.fromRGB(12, 12, 16)
 local LighterBg = Color3.fromRGB(20, 20, 25)
 
@@ -43,7 +53,7 @@ Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color = MainGreen; MainStroke.Thickness = 2; MainStroke.Transparency = 0.3
 
--- [3] YAĞMUR EFEKTİ (SADECE MENÜ İÇİNDE VE DAHA BELİRGİN)
+-- [3] YAĞMUR EFEKTİ
 local RainContainer = Instance.new("Frame", Main)
 RainContainer.Size = UDim2.new(1, 0, 1, 0); RainContainer.BackgroundTransparency = 1
 RainContainer.ClipsDescendants = true; RainContainer.ZIndex = 1
@@ -51,15 +61,13 @@ RainContainer.ClipsDescendants = true; RainContainer.ZIndex = 1
 local Raindrops = {}
 local RainEnabled = true
 
-for i = 1, 80 do -- Damla sayısı artırıldı
+for i = 1, 80 do
     local drop = Instance.new("Frame", RainContainer)
     drop.Size = UDim2.new(0, 2, 0, math.random(20, 40))
-    drop.BackgroundColor3 = Color3.fromRGB(220, 230, 255) -- Çok daha belirgin beyaz-mavi
-    drop.BackgroundTransparency = math.random(10, 40) / 100 -- Transparanlık azaltıldı (daha net)
-    drop.BorderSizePixel = 0
-    drop.Rotation = 20 -- Çapraz düşüş
-    drop.Position = UDim2.new(math.random(), 0, -math.random(), 0)
-    drop.ZIndex = 1
+    drop.BackgroundColor3 = Color3.fromRGB(220, 230, 255)
+    drop.BackgroundTransparency = math.random(10, 40) / 100
+    drop.BorderSizePixel = 0; drop.Rotation = 20
+    drop.Position = UDim2.new(math.random(), 0, -math.random(), 0); drop.ZIndex = 1
     Instance.new("UICorner", drop).CornerRadius = UDim.new(1, 0)
     
     local speed = math.random(40, 70) / 1000
@@ -67,7 +75,7 @@ for i = 1, 80 do -- Damla sayısı artırıldı
     table.insert(Raindrops, {obj = drop, spd = speed, swy = sway})
 end
 
-RunService.RenderStepped:Connect(function()
+AddConnection(RunService.RenderStepped:Connect(function()
     if not RainEnabled then return end
     for _, dropData in ipairs(Raindrops) do
         local d = dropData.obj
@@ -76,16 +84,16 @@ RunService.RenderStepped:Connect(function()
             d.Position = UDim2.new(math.random() - 0.2, 0, -0.2, 0) 
         end
     end
-end)
+end))
 
--- [4] GELİŞMİŞ SOL MENÜ & LOGO
+-- [4] SOL MENÜ & LOGO
 local Sidebar = Instance.new("Frame", Main)
 Sidebar.Size = UDim2.new(0, 180, 1, 0); Sidebar.BackgroundColor3 = Color3.fromRGB(8, 8, 10); Sidebar.ZIndex = 2
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 12)
+
 local SidebarLine = Instance.new("Frame", Sidebar)
 SidebarLine.Size = UDim2.new(0, 2, 1, 0); SidebarLine.Position = UDim2.new(1, -2, 0, 0); SidebarLine.BackgroundColor3 = MainGreen; SidebarLine.BorderSizePixel = 0; SidebarLine.ZIndex = 3
 
--- FURENT LSC - Neon Animasyonlu Title
 local Title = Instance.new("TextLabel", Sidebar)
 Title.Size = UDim2.new(1, 0, 0, 60); Title.Position = UDim2.new(0, 0, 0, 5)
 Title.Text = "FURENT LSC"; Title.TextColor3 = Color3.new(1,1,1)
@@ -97,22 +105,11 @@ TitleGradient.Color = ColorSequence.new{
     ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)),
     ColorSequenceKeypoint.new(1, MainGreen)
 }
+
 task.spawn(function()
     local rot = 0
-    while task.wait(0.05) do rot = rot + 2; if rot >= 360 then rot = 0 end; TitleGradient.Rotation = rot end
+    while task.wait(0.05) do rot = rot + 2; if rot >= 360 then rot = 0 end; pcall(function() TitleGradient.Rotation = rot end) end
 end)
-
--- Discord Etiketi
-local DiscordFrame = Instance.new("Frame", Sidebar)
-DiscordFrame.Size = UDim2.new(1, -20, 0, 40); DiscordFrame.Position = UDim2.new(0, 10, 1, -50)
-DiscordFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40); DiscordFrame.ZIndex = 3
-Instance.new("UICorner", DiscordFrame).CornerRadius = UDim.new(0, 8)
-Instance.new("UIStroke", DiscordFrame).Color = Color3.fromRGB(88, 101, 242)
-
-local DiscordLabel = Instance.new("TextLabel", DiscordFrame)
-DiscordLabel.Size = UDim2.new(1, 0, 1, 0); DiscordLabel.BackgroundTransparency = 1
-DiscordLabel.Text = "Discord: eren01_."; DiscordLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
-DiscordLabel.Font = Enum.Font.GothamBold; DiscordLabel.TextSize = 12; DiscordLabel.ZIndex = 3
 
 local TabContainer = Instance.new("Frame", Main)
 TabContainer.Size = UDim2.new(1, -190, 1, -20); TabContainer.Position = UDim2.new(0, 190, 0, 10)
@@ -133,6 +130,8 @@ local function CreateTab(iconText, yPos, isActiveDefault)
     local TabPage = Instance.new("ScrollingFrame", TabContainer)
     TabPage.Size = UDim2.new(1, 0, 1, 0); TabPage.BackgroundTransparency = 1
     TabPage.ScrollBarThickness = 4; TabPage.ScrollBarImageColor3 = MainGreen; TabPage.Visible = isActiveDefault; TabPage.ZIndex = 3
+    TabPage.AutomaticCanvasSize = Enum.AutomaticSize.Y -- KAYDIRMA ÇUBUĞU SORUNU BURADA ÇÖZÜLDÜ
+    
     local UIListLayout = Instance.new("UIListLayout", TabPage)
     UIListLayout.Padding = UDim.new(0, 12); UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     
@@ -191,94 +190,45 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [7] KUSURSUZ EGG ESP (LAG YOK, SPAM YOK, MESAFE SINIRI VAR)
+-- [7] GÖRSEL ÖZELLİKLER VE ESP
 local VSettings = { Box = false, Tracer = false, EggChams = false }
-
-local function ClearEggESP()
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj.Name == "F_EggESP" then obj:Destroy() end
-    end
-end
-
-local function UpdateEggs()
-    if not VSettings.EggChams then ClearEggESP(); return end
-    ClearEggESP() -- Öncekileri temizle
-
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") then
-            -- SPAM ENGELLEYİCİ: Objede PrimaryPart yoksa büyük ihtimalle çöptür, geç.
-            local rootPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
-            if rootPart then
-                -- MESAFE FİLTRESİ: Karakterine 400 stud'dan uzaksa (başka dünyadaysa) yoksay!
-                local distance = (rootPart.Position - hrp.Position).Magnitude
-                if distance < 400 then 
-                    local isEgg = false
-                    local eggText = ""
-                    local eggColor = Color3.fromRGB(255, 215, 0)
-                    
-                    local nameL = string.lower(obj.Name)
-                    if nameL:find("egg") or nameL:find("yumurta") then isEgg = true end
-                    
-                    for _, desc in ipairs(obj:GetDescendants()) do
-                        if desc:IsA("TextLabel") and (desc.Text:find("x") or desc.Text:find("Şans") or desc.Text:find("Yumurta")) then
-                            isEgg = true; eggText = desc.Text; eggColor = desc.TextColor3; break
-                        end
-                    end
-                    
-                    if isEgg then
-                        local bgui = Instance.new("BillboardGui", rootPart)
-                        bgui.Name = "F_EggESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 250, 0, 50); bgui.StudsOffset = Vector3.new(0, 5, 0)
-                        
-                        local lbl = Instance.new("TextLabel", bgui)
-                        lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1
-                        lbl.Text = "🥚 " .. (eggText ~= "" and eggText or "Yumurta")
-                        lbl.TextColor3 = eggColor
-                        lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 15; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
-                    end
-                end
-            end
-        end
-    end
-end
-
--- Lag girmemesi için ESP taramasını sadece 30 saniyede bir yap
-task.spawn(function()
-    while true do
-        task.wait(30)
-        if VSettings.EggChams then pcall(UpdateEggs) end
-    end
-end)
 
 CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
-CreateToggle(TabVisuals, "Yumurta ESP (Bulunduğun Oda)", function(s) VSettings.EggChams = s; if s then pcall(UpdateEggs) else ClearEggESP() end end)
-CreateButton(TabVisuals, "🔄 Yumurtaları Şimdi Yenile (Oda Değişince Bas)", function() pcall(UpdateEggs) end)
 
--- Oyuncu ESP Döngüsü (Lag yapmaz, RenderStepped)
+local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
 local ESP_Boxes = {}; local ESP_Lines = {}
-RunService.RenderStepped:Connect(function()
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            if not ESP_Boxes[player] then
-                ESP_Boxes[player] = Drawing.new("Square"); ESP_Boxes[player].Thickness = 1.5; ESP_Boxes[player].Filled = false
-                ESP_Lines[player] = Drawing.new("Line"); ESP_Lines[player].Color = MainGreen; ESP_Lines[player].Thickness = 1
-            end
-            local box = ESP_Boxes[player]; local line = ESP_Lines[player]
-            if (VSettings.Box or VSettings.Tracer) and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                if onScreen then
-                    if VSettings.Box then box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z); box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2); box.Color = player.TeamColor.Color; box.Visible = true else box.Visible = false end
-                    if VSettings.Tracer then line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y); line.To = Vector2.new(pos.X, pos.Y); line.Visible = true else line.Visible = false end
-                else box.Visible = false; line.Visible = false end
-            else box.Visible = false; line.Visible = false end
-        end
-    end
-end)
 
--- [8] PLAYER
+if DrawingSupported then
+    AddConnection(RunService.RenderStepped:Connect(function()
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer then
+                if not ESP_Boxes[player] then
+                    pcall(function()
+                        ESP_Boxes[player] = Drawing.new("Square"); ESP_Boxes[player].Thickness = 1.5; ESP_Boxes[player].Filled = false
+                        ESP_Lines[player] = Drawing.new("Line"); ESP_Lines[player].Color = MainGreen; ESP_Lines[player].Thickness = 1
+                    end)
+                end
+                local box = ESP_Boxes[player]; local line = ESP_Lines[player]
+                if box and line then
+                    if (VSettings.Box or VSettings.Tracer) and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
+                        if onScreen then
+                            if VSettings.Box then box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z); box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2); box.Color = player.TeamColor.Color; box.Visible = true else box.Visible = false end
+                            if VSettings.Tracer then line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y); line.To = Vector2.new(pos.X, pos.Y); line.Visible = true else line.Visible = false end
+                        else box.Visible = false; line.Visible = false end
+                    else box.Visible = false; line.Visible = false end
+                end
+            end
+        end
+    end))
+else
+    local WarnLabel = Instance.new("TextLabel", TabVisuals)
+    WarnLabel.Size = UDim2.new(1, -15, 0, 20); WarnLabel.BackgroundTransparency = 1
+    WarnLabel.Text = "⚠️ Executorunuz Drawing API desteklemiyor! ESP Kullanılamaz."; WarnLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+end
+
+-- [8] OYUNCU HAREKETLERİ (PLAYER)
 local PSettings = { Speed = 16, Jump = 50, Fly = false, FlySpeed = 50, Spider = false }
 CreateToggle(TabPlayer, "Fly (Uçma - WASD/Boşluk)", function(s) PSettings.Fly = s end)
 CreateSlider(TabPlayer, "Fly Hızı", 10, 300, 50, function(val) PSettings.FlySpeed = val end)
@@ -293,7 +243,7 @@ task.spawn(function()
     end
 end)
 
-RunService.RenderStepped:Connect(function()
+AddConnection(RunService.RenderStepped:Connect(function()
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
     local hrp = char.HumanoidRootPart; local hum = char.Humanoid
@@ -312,73 +262,28 @@ RunService.RenderStepped:Connect(function()
     else
         if hum.PlatformStand then hum.PlatformStand = false end
     end
+end))
 
-    if PSettings.Spider and not PSettings.Fly then
-        local result = workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 3, RaycastParams.new())
-        if result and UserInputService:IsKeyDown(Enum.KeyCode.W) then hrp.Velocity = Vector3.new(hrp.Velocity.X, 50, hrp.Velocity.Z) end
-    end
-end)
-
--- [9] WORLD
-CreateSlider(TabWorld, "Yerçekimi (Gravity)", 0, 500, 196, function(val) workspace.Gravity = val end)
-CreateSlider(TabWorld, "Saat (ClockTime)", 0, 24, 14, function(val) Lighting.ClockTime = val end)
-CreateToggle(TabWorld, "Sisi Sil (No Fog)", function(state) Lighting.FogEnd = state and 100000 or 1000; local atm = Lighting:FindFirstChildWhichIsA("Atmosphere"); if atm then atm.Density = state and 0 or 0.3 end end)
-
--- [10] TELEPORT
-local TargetName = ""
-CreateTextBox(TabTeleport, "Oyuncu Adını Girin...", function(txt) TargetName = string.lower(txt) end)
-CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and string.sub(string.lower(p.Name), 1, #TargetName) == TargetName and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then 
-            LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame; break 
-        end
-    end
-end)
-
--- [11] AUTOFARM
-local AutoTapOn = false
-CreateToggle(TabAutoFarm, "Auto Clicker (Hızlı Tıklama)", function(state)
-    AutoTapOn = state
-    task.spawn(function()
-        while AutoTapOn do
-            pcall(function() VirtualInputManager:SendMouseButtonEvent(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2, 0, true, game, 1); VirtualInputManager:SendMouseButtonEvent(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2, 0, false, game, 1) end)
-            task.wait(0.01)
-        end
-    end)
-end)
-
--- [12] SKIN CHANGER
-local ChangerData = { Shirt = "", Pants = "" }
-local skinWarn = Instance.new("TextLabel", TabSkinChanger); skinWarn.Size = UDim2.new(1, -15, 0, 20); skinWarn.BackgroundTransparency = 1; skinWarn.Text = "Not: Katalog ID değil, 'Image ID' giriniz."; skinWarn.TextColor3 = Color3.fromRGB(200, 200, 200); skinWarn.Font = Enum.Font.Gotham; skinWarn.TextSize = 12
-CreateTextBox(TabSkinChanger, "Kıyafet (Shirt) Image ID...", function(txt) ChangerData.Shirt = txt end)
-CreateTextBox(TabSkinChanger, "Pantolon (Pants) Image ID...", function(txt) ChangerData.Pants = txt end)
-CreateButton(TabSkinChanger, "Kıyafeti Uygula", function()
-    local char = LocalPlayer.Character
-    if not char then return end
-    pcall(function()
-        if ChangerData.Shirt ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("Shirt") then v:Destroy() end end; local s = Instance.new("Shirt", char); s.ShirtTemplate = "rbxassetid://" .. ChangerData.Shirt end
-        if ChangerData.Pants ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("Pants") then v:Destroy() end end; local p = Instance.new("Pants", char); p.PantsTemplate = "rbxassetid://" .. ChangerData.Pants end
-    end)
-end)
-
--- [13] SETTINGS & PROFİL
+-- [9] SETTINGS & PROFİL
 local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ProfileFrame).Color = MainGreen
 local AvatarImage = Instance.new("ImageLabel", ProfileFrame); AvatarImage.Size = UDim2.new(0, 60, 0, 60); AvatarImage.Position = UDim2.new(0, 10, 0, 10); AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
-pcall(function() local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420); if isReady then AvatarImage.Image = content end end)
+
+-- AKIŞI DURDURAN YIELD İŞLEMİ DÜZELTİLDİ (task.spawn içine alındı)
+task.spawn(function()
+    pcall(function() 
+        local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+        if isReady then AvatarImage.Image = content end 
+    end)
+end)
 
 local NameLabel = Instance.new("TextLabel", ProfileFrame); NameLabel.Size = UDim2.new(1, -90, 0, 30); NameLabel.Position = UDim2.new(0, 80, 0, 10); NameLabel.BackgroundTransparency = 1; NameLabel.Text = "👤 " .. LocalPlayer.Name; NameLabel.TextColor3 = MainGreen; NameLabel.Font = Enum.Font.GothamBold; NameLabel.TextXAlignment = Enum.TextXAlignment.Left; NameLabel.TextSize = 16
 local TimeLabel = Instance.new("TextLabel", ProfileFrame); TimeLabel.Size = UDim2.new(1, -90, 0, 30); TimeLabel.Position = UDim2.new(0, 80, 0, 40); TimeLabel.BackgroundTransparency = 1; TimeLabel.Text = "⏱️ Oynama Süresi: 00:00:00"; TimeLabel.TextColor3 = Color3.new(1, 1, 1); TimeLabel.Font = Enum.Font.Gotham; TimeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local StartTime = tick()
-RunService.RenderStepped:Connect(function()
+AddConnection(RunService.RenderStepped:Connect(function()
     local elapsed = tick() - StartTime
     TimeLabel.Text = string.format("⏱️ Oynama Süresi: %02d:%02d:%02d", math.floor(elapsed / 3600), math.floor((elapsed % 3600) / 60), math.floor(elapsed % 60))
-end)
-
-CreateToggle(TabSettings, "Arka Plan Yağmurunu Kapat", function(state)
-    RainEnabled = not state
-    for _, drop in ipairs(Raindrops) do drop.obj.Visible = not state end
-end)
+end))
 
 local MenuKeybind = Enum.KeyCode.RightControl
 local KeybindBtn = Instance.new("TextButton", TabSettings); KeybindBtn.Size = UDim2.new(1, -15, 0, 45); KeybindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50); KeybindBtn.Text = "Menü Tuşu: RightControl (Değiştir)"; KeybindBtn.TextColor3 = Color3.new(1,1,1); KeybindBtn.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeybindBtn).CornerRadius = UDim.new(0, 6)
@@ -389,8 +294,13 @@ KeybindBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == MenuKeybind then if Main then Main.Visible = not Main.Visible; if Blur then Blur.Enabled = Main.Visible end end end
-end)
+AddConnection(UserInputService.InputBegan:Connect(function(input, gpe)
+    if not gpe and input.KeyCode == MenuKeybind then 
+        if Main then 
+            Main.Visible = not Main.Visible
+            if Blur then Blur.Enabled = Main.Visible end 
+        end 
+    end
+end))
 
-print("FURENT_LSC v25.0 VIP - Basariyla Yuklendi!")
+print("FURENT_LSC v25.0 VIP - Optimizasyon Tamamlandı ve Yüklendi!")
