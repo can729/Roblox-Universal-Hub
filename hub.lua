@@ -1,4 +1,4 @@
--- FURENT_LSC v23.0 - Premium UI, Fly & Spider, Enhanced Egg ESP
+-- FURENT_LSC v24.0 - Rain UI, Perfect Egg ESP & Skin Changer Fix
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -9,20 +9,23 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- [GUI KORUMASI VE BYPASS SİSTEMİ]
+-- [GUI KORUMASI VE BYPASS]
 local TargetGui = nil
 pcall(function() TargetGui = (gethui and gethui()) or game:GetService("CoreGui") end)
 if not TargetGui or not pcall(function() local _ = TargetGui.Name end) then
     TargetGui = LocalPlayer:WaitForChild("PlayerGui")
 end
 
--- [1] ESKİ KALINTILARI TEMİZLE
+-- [1] ESKİ KALINTILARI TEMİZLE (Spamları Yok Et)
 pcall(function()
     if TargetGui:FindFirstChild("FURENT_PRO_UI") then TargetGui.FURENT_PRO_UI:Destroy() end
     if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v.Name == "F_EggESP" or v.Name == "F_EggChams" then v:Destroy() end
+    end
 end)
 
--- [2] ANA ARAYÜZ VE ESTETİK BLUR
+-- [2] ANA ARAYÜZ
 local Blur = Instance.new("BlurEffect")
 Blur.Name = "FURENT_Blur"; Blur.Size = 15; Blur.Enabled = true
 pcall(function() Blur.Parent = Lighting end)
@@ -31,7 +34,7 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "FURENT_PRO_UI"; ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = TargetGui
 
-local MainGreen = Color3.fromRGB(0, 255, 100) -- Daha canlı, neon bir yeşil tema
+local MainGreen = Color3.fromRGB(0, 255, 100)
 local DarkBg = Color3.fromRGB(15, 15, 20)
 local LighterBg = Color3.fromRGB(25, 25, 30)
 
@@ -40,52 +43,54 @@ Main.Size = UDim2.new(0, 700, 0, 500); Main.Position = UDim2.new(0.5, -350, 0.5,
 Main.BackgroundColor3 = DarkBg; Main.BorderSizePixel = 0
 Main.Active = true; Main.Draggable = true; Main.ClipsDescendants = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
-
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color = MainGreen; MainStroke.Thickness = 1.5; MainStroke.Transparency = 0.5
 
--- [3] KAR TANESİ EFEKTİ (ARKAPLAN)
-local SnowFolder = Instance.new("Folder", Main)
-local Snowflakes = {}
-local SnowEnabled = true
+-- [3] YENİ YAĞMUR EFEKTİ (Animasyonlu)
+local RainFolder = Instance.new("Folder", Main)
+local Raindrops = {}
+local RainEnabled = true
 
-for i = 1, 40 do
-    local flake = Instance.new("Frame", SnowFolder)
-    local size = math.random(2, 5)
-    flake.Size = UDim2.new(0, size, 0, size); flake.BackgroundColor3 = MainGreen
-    flake.BackgroundTransparency = math.random(50, 80) / 100; flake.BorderSizePixel = 0
-    flake.Position = UDim2.new(math.random(), 0, -math.random(), 0)
-    flake.ZIndex = 0; Instance.new("UICorner", flake).CornerRadius = UDim.new(1, 0)
-    local speed = math.random(10, 30) / 1000
-    local sway = math.random(-10, 10) / 10000
-    table.insert(Snowflakes, {obj = flake, spd = speed, swy = sway})
+for i = 1, 70 do
+    local drop = Instance.new("Frame", RainFolder)
+    drop.Size = UDim2.new(0, 2, 0, math.random(15, 30))
+    drop.BackgroundColor3 = Color3.fromRGB(150, 180, 255) -- Yağmur rengi
+    drop.BackgroundTransparency = math.random(50, 80) / 100
+    drop.BorderSizePixel = 0
+    drop.Rotation = 15 -- Çapraz düşüş
+    drop.Position = UDim2.new(math.random(), 0, -math.random(), 0)
+    drop.ZIndex = 0
+    Instance.new("UICorner", drop).CornerRadius = UDim.new(1, 0)
+    
+    local speed = math.random(30, 60) / 1000 -- Kar'dan daha hızlı
+    local sway = 0.003 -- Rüzgar yönü
+    table.insert(Raindrops, {obj = drop, spd = speed, swy = sway})
 end
 
 RunService.RenderStepped:Connect(function()
-    if not SnowEnabled then return end
-    for _, flakeData in ipairs(Snowflakes) do
-        local f = flakeData.obj
-        f.Position = f.Position + UDim2.new(flakeData.swy, 0, flakeData.spd, 0)
-        if f.Position.Y.Scale > 1 then f.Position = UDim2.new(math.random(), 0, -0.1, 0) end
+    if not RainEnabled then return end
+    for _, dropData in ipairs(Raindrops) do
+        local d = dropData.obj
+        d.Position = d.Position + UDim2.new(dropData.swy, 0, dropData.spd, 0)
+        if d.Position.Y.Scale > 1.1 then 
+            d.Position = UDim2.new(math.random() - 0.2, 0, -0.2, 0) 
+        end
     end
 end)
 
--- [4] SOL MENÜ (SIDEBAR) & DİSCORD YAZISI
+-- [4] SOL MENÜ & DİSCORD YAZISI
 local Sidebar = Instance.new("Frame", Main)
-Sidebar.Size = UDim2.new(0, 170, 1, 0); Sidebar.BackgroundColor3 = Color3.fromRGB(10, 10, 12)
-Sidebar.ZIndex = 2; Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 10)
+Sidebar.Size = UDim2.new(0, 170, 1, 0); Sidebar.BackgroundColor3 = Color3.fromRGB(10, 10, 12); Sidebar.ZIndex = 2
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 10)
 local SidebarLine = Instance.new("Frame", Sidebar)
 SidebarLine.Size = UDim2.new(0, 2, 1, 0); SidebarLine.Position = UDim2.new(1, -2, 0, 0); SidebarLine.BackgroundColor3 = MainGreen; SidebarLine.BorderSizePixel = 0; SidebarLine.ZIndex = 3
 
--- Başlık Boyutu Orantılandı
 local Title = Instance.new("TextLabel", Sidebar)
 Title.Size = UDim2.new(1, 0, 0, 50); Title.Position = UDim2.new(0, 0, 0, 10)
 Title.Text = "FURENT LSC"; Title.TextColor3 = MainGreen
 Title.Font = Enum.Font.GothamBlack; Title.TextSize = 18; Title.BackgroundTransparency = 1; Title.ZIndex = 2
-local TitleStroke = Instance.new("UIStroke", Title)
-TitleStroke.Color = Color3.new(0,0,0); TitleStroke.Thickness = 1.5
+Instance.new("UIStroke", Title).Color = Color3.new(0,0,0); Instance.new("UIStroke", Title).Thickness = 1.5
 
--- Discord Etiketi
 local DiscordLabel = Instance.new("TextLabel", Sidebar)
 DiscordLabel.Size = UDim2.new(1, 0, 0, 30); DiscordLabel.Position = UDim2.new(0, 0, 1, -40)
 DiscordLabel.Text = "Devamı için dc : eren01_."; DiscordLabel.TextColor3 = Color3.fromRGB(180, 180, 180)
@@ -95,7 +100,7 @@ local TabContainer = Instance.new("Frame", Main)
 TabContainer.Size = UDim2.new(1, -180, 1, -20); TabContainer.Position = UDim2.new(0, 180, 0, 10)
 TabContainer.BackgroundTransparency = 1; TabContainer.ZIndex = 2
 
--- [5] UI FRAMEWORK MOTORU (Şıklaştırma Eklendi)
+-- [5] UI MOTORU
 local Tabs = {}
 local function CreateTab(iconText, yPos, isActiveDefault)
     local TabBtn = Instance.new("TextButton", Sidebar)
@@ -108,7 +113,6 @@ local function CreateTab(iconText, yPos, isActiveDefault)
     local TabPage = Instance.new("ScrollingFrame", TabContainer)
     TabPage.Size = UDim2.new(1, 0, 1, 0); TabPage.BackgroundTransparency = 1
     TabPage.ScrollBarThickness = 3; TabPage.ScrollBarImageColor3 = MainGreen; TabPage.Visible = isActiveDefault; TabPage.ZIndex = 2
-    
     local UIListLayout = Instance.new("UIListLayout", TabPage)
     UIListLayout.Padding = UDim.new(0, 10); UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     
@@ -121,15 +125,9 @@ local function CreateTab(iconText, yPos, isActiveDefault)
 end
 
 local function CreateToggle(parent, text, callback)
-    local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 40); Container.BackgroundColor3 = LighterBg; Container.ZIndex = 2
-    Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
-    Instance.new("UIStroke", Container).Color = Color3.fromRGB(40,40,50)
-    
+    local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 40); Container.BackgroundColor3 = LighterBg; Container.ZIndex = 2; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(40,40,50)
     local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(0.8, 0, 1, 0); Label.Position = UDim2.new(0, 15, 0, 0); Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 13; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1; Label.ZIndex = 2
-    
-    local ToggleBtn = Instance.new("TextButton", Container); ToggleBtn.Size = UDim2.new(0, 40, 0, 20); ToggleBtn.Position = UDim2.new(1, -55, 0.5, -10); ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60); ToggleBtn.Text = ""; ToggleBtn.ZIndex = 2
-    Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
-    
+    local ToggleBtn = Instance.new("TextButton", Container); ToggleBtn.Size = UDim2.new(0, 40, 0, 20); ToggleBtn.Position = UDim2.new(1, -55, 0.5, -10); ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60); ToggleBtn.Text = ""; ToggleBtn.ZIndex = 2; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
     local state = false
     ToggleBtn.MouseButton1Click:Connect(function() state = not state; ToggleBtn.BackgroundColor3 = state and MainGreen or Color3.fromRGB(50, 50, 60); task.spawn(function() pcall(callback, state) end) end)
 end
@@ -141,21 +139,16 @@ end
 
 local function CreateSlider(parent, text, min, max, default, callback)
     local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 55); Container.BackgroundColor3 = LighterBg; Container.ZIndex = 2; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(40,40,50)
-    
     local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(1, -20, 0, 20); Label.Position = UDim2.new(0, 15, 0, 8); Label.Text = text .. " : " .. default; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 13; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1; Label.ZIndex = 2
-    
     local SliderBG = Instance.new("Frame", Container); SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, 35); SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50); SliderBG.ZIndex = 2; Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
-    
     local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0); SliderFill.BackgroundColor3 = MainGreen; SliderFill.ZIndex = 2; Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
-    
     local dragging = false
     SliderBG.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
     UserInputService.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local relX = math.clamp((UserInputService:GetMouseLocation().X - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1)
-            SliderFill.Size = UDim2.new(relX, 0, 1, 0)
-            local value = math.floor(min + (max - min) * relX)
+            SliderFill.Size = UDim2.new(relX, 0, 1, 0); local value = math.floor(min + (max - min) * relX)
             Label.Text = text .. " : " .. value; pcall(callback, value)
         end
     end)
@@ -178,10 +171,11 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 230, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 270, false)
 local TabSettings   = CreateTab("⚙️ Settings", 310, false)
 
--- [7] VISUALS VE EGG ESP (FİXLENDİ)
+-- [7] KUSURSUZ EGG ESP (SPAM FİX VE RENK/ŞANS OKUMA)
 local VSettings = { Box = false, Tracer = false, Chams = false, EggChams = false }
 local ESP_Boxes = {}; local ESP_Lines = {}
 
+-- Oyuncu ESP (Kısaltıldı)
 RunService.RenderStepped:Connect(function()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
@@ -201,48 +195,61 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-local function isValidEgg(obj)
-    if not obj:IsA("Model") then return false end
-    local name = string.lower(obj.Name)
-    if not name:find("egg") then return false end
-    local badNames = {"crate", "safe", "chest", "present", "gift"}
-    for _, bad in ipairs(badNames) do if name:find(bad) then return false end end
-    -- Modellerde GUI'nin gözükmesi için içinden fiziksel bir BasePart buluyoruz.
-    local basePart = obj:FindFirstChildWhichIsA("BasePart", true)
-    return basePart ~= nil
-end
-
+-- Gelişmiş Yumurta Tarayıcı
 task.spawn(function()
-    while task.wait(3) do
+    while task.wait(1) do
         if VSettings.EggChams then
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if isValidEgg(obj) then
-                    local basePart = obj:FindFirstChildWhichIsA("BasePart", true)
+                -- Sadece Modelleri tara (Paraları/Çöpleri es geçer)
+                if obj:IsA("Model") then
+                    local isEgg = false
+                    local eggText = ""
+                    local eggColor = Color3.fromRGB(255, 215, 0) -- Varsayılan Altın Sarısı
                     
-                    if basePart and not basePart:FindFirstChild("F_EggChams") then
-                        local hl = Instance.new("Highlight", basePart)
-                        hl.Name = "F_EggChams"; hl.FillColor = Color3.fromRGB(255, 215, 0); hl.FillTransparency = 0.4; hl.OutlineColor = MainGreen
+                    local nameL = string.lower(obj.Name)
+                    -- İsmi yumurta olanları bul
+                    if nameL:find("egg") or nameL:find("yumurta") then isEgg = true end
+                    
+                    -- İçinde Şans/Çarpan yazısı varsa kesin yumurtadır, rengini de oradan al.
+                    for _, desc in ipairs(obj:GetDescendants()) do
+                        if desc:IsA("TextLabel") and (desc.Text:find("x") or desc.Text:find("Şans") or desc.Text:find("Yumurta")) then
+                            isEgg = true
+                            eggText = desc.Text
+                            eggColor = desc.TextColor3 -- Oyunun o yumurta için belirlediği rengi kopyala
+                            break
+                        end
                     end
                     
-                    if basePart and not basePart:FindFirstChild("F_EggESP") then
-                        local multiplierText = string.match(obj.Name, "%d+x") or string.match(obj.Name, "x%d+") or ""
-                        local eggText = "🥚 Yumurta" .. (multiplierText ~= "" and (" [" .. multiplierText .. "]") or "")
-                        
-                        -- Doğrudan BasePart'a ekliyoruz, böylece asla görünmez olmaz.
-                        local bgui = Instance.new("BillboardGui", basePart)
-                        bgui.Name = "F_EggESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 150, 0, 40); bgui.StudsOffset = Vector3.new(0, 3, 0)
-                        
-                        local lbl = Instance.new("TextLabel", bgui)
-                        lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1; lbl.Text = eggText; lbl.TextColor3 = MainGreen
-                        lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 14; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
+                    if isEgg then
+                        local rootPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+                        if rootPart then
+                            -- Daha önce çizilmemişse Çiz
+                            if not rootPart:FindFirstChild("F_EggESP") then
+                                local bgui = Instance.new("BillboardGui", rootPart)
+                                bgui.Name = "F_EggESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 200, 0, 50); bgui.StudsOffset = Vector3.new(0, 4, 0)
+                                
+                                local lbl = Instance.new("TextLabel", bgui)
+                                lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1
+                                lbl.Text = "🥚 " .. (eggText ~= "" and eggText or "Yumurta")
+                                lbl.TextColor3 = eggColor -- Rengi yansıt
+                                lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 14; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
+                            else
+                                -- Varsa sadece yazıyı/rengi güncelle (Oda değişirse diye)
+                                local lbl = rootPart.F_EggESP:FindFirstChildOfClass("TextLabel")
+                                if lbl then
+                                    lbl.Text = "🥚 " .. (eggText ~= "" and eggText or "Yumurta")
+                                    lbl.TextColor3 = eggColor
+                                end
+                            end
+                        end
                     end
                 end
             end
         else
+            -- Kapatıldığında tüm ESP'leri anında sil
             for _, obj in ipairs(workspace:GetDescendants()) do
-                if obj:IsA("BasePart") then
-                    if obj:FindFirstChild("F_EggChams") then obj.F_EggChams:Destroy() end
-                    if obj:FindFirstChild("F_EggESP") then obj.F_EggESP:Destroy() end
+                if obj:IsA("BasePart") and obj:FindFirstChild("F_EggESP") then
+                    obj.F_EggESP:Destroy()
                 end
             end
         end
@@ -251,10 +258,9 @@ end)
 
 CreateToggle(TabVisuals, "2D Box ESP", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Çizgi)", function(s) VSettings.Tracer = s end)
-CreateToggle(TabVisuals, "Player Chams", function(s) VSettings.Chams = s end)
-CreateToggle(TabVisuals, "Gerçek Yumurta ESP (Fixlendi)", function(s) VSettings.EggChams = s end)
+CreateToggle(TabVisuals, "Şans & Renk Uyumlu Egg ESP", function(s) VSettings.EggChams = s end)
 
--- [8] PLAYER MODS (FLY & SPIDER EKLENDİ)
+-- [8] PLAYER MODS (FLY & SPIDER)
 local PSettings = { Speed = 30, Jump = 75, Fly = false, FlySpeed = 50, Spider = false }
 
 CreateToggle(TabPlayer, "Fly (Uçma - WASD & Boşluk)", function(s) PSettings.Fly = s end)
@@ -263,11 +269,10 @@ CreateToggle(TabPlayer, "Spider (Duvara Tırmanma)", function(s) PSettings.Spide
 CreateSlider(TabPlayer, "Walk Speed", 30, 250, 30, function(val) PSettings.Speed = val end)
 CreateSlider(TabPlayer, "Jump Power", 75, 300, 75, function(val) PSettings.Jump = val end)
 
--- WalkSpeed & JumpPower Loop
 task.spawn(function()
     while task.wait(0.1) do
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-            if not PSettings.Fly then -- Fly açıkken hızları dondurmamak için
+            if not PSettings.Fly then
                 LocalPlayer.Character.Humanoid.WalkSpeed = PSettings.Speed
                 LocalPlayer.Character.Humanoid.JumpPower = PSettings.Jump
             end
@@ -275,16 +280,14 @@ task.spawn(function()
     end
 end)
 
--- Fly & Spider (RenderStepped Mükemmel Optimizasyon)
 RunService.RenderStepped:Connect(function()
     local char = LocalPlayer.Character
     if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
     local hrp = char.HumanoidRootPart
     local hum = char.Humanoid
 
-    -- Fly Mantığı
     if PSettings.Fly then
-        hum.PlatformStand = true -- Karakterin düşmesini/yürümesini engeller
+        hum.PlatformStand = true
         local camCFrame = workspace.CurrentCamera.CFrame
         local moveDir = Vector3.new(0, 0, 0)
         
@@ -296,19 +299,16 @@ RunService.RenderStepped:Connect(function()
         if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
         
         if moveDir.Magnitude > 0 then hrp.Velocity = moveDir.Unit * PSettings.FlySpeed else hrp.Velocity = Vector3.new(0, 0, 0) end
-        hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camCFrame.LookVector) -- Yönü kameraya sabitler
+        hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camCFrame.LookVector)
     else
         if hum.PlatformStand then hum.PlatformStand = false end
     end
 
-    -- Spider Mantığı (Işın göndererek duvar algılama)
     if PSettings.Spider and not PSettings.Fly then
         local rayOrigin = hrp.Position
-        local rayDirection = hrp.CFrame.LookVector * 2.5 -- Karakterin 2.5 birim önüne ışın yolla
+        local rayDirection = hrp.CFrame.LookVector * 2.5
         local params = RaycastParams.new(); params.FilterDescendantsInstances = {char}; params.FilterType = Enum.RaycastFilterType.Exclude
-        
         local result = workspace:Raycast(rayOrigin, rayDirection, params)
-        -- Eğer önünde duvar varsa ve W'ye basıyorsa karakteri havaya kaldır
         if result and UserInputService:IsKeyDown(Enum.KeyCode.W) then
             hrp.Velocity = Vector3.new(hrp.Velocity.X, 50, hrp.Velocity.Z)
         end
@@ -324,7 +324,7 @@ CreateToggle(TabWorld, "Sisi Sil (No Fog)", function(state)
 end)
 
 -- [10] TELEPORT SEKMESİ
-local TargetName = ""; local SavedPos = nil
+local TargetName = ""
 CreateTextBox(TabTeleport, "Oyuncu Adını Girin...", function(txt) TargetName = string.lower(txt) end)
 CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
     if TargetName == "" then return end
@@ -336,7 +336,7 @@ CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
 end)
 
 -- [11] AUTOFARM
-local AutoTapOn = false; local AutoEggOn = false
+local AutoTapOn = false
 CreateToggle(TabAutoFarm, "Auto Clicker (1ms)", function(state)
     AutoTapOn = state
     task.spawn(function()
@@ -346,42 +346,31 @@ CreateToggle(TabAutoFarm, "Auto Clicker (1ms)", function(state)
         end
     end)
 end)
-CreateToggle(TabAutoFarm, "Auto Hatch Nearest Egg", function(state)
-    AutoEggOn = state
-    task.spawn(function()
-        while AutoEggOn do
-            pcall(function()
-                for _, prompt in ipairs(workspace:GetDescendants()) do
-                    if prompt:IsA("ProximityPrompt") and (prompt.ObjectText:find("Egg") or prompt.ActionText:find("Open")) then
-                        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and (prompt.Parent.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 20 then pcall(function() fireproximityprompt(prompt) end) end
-                    end
-                end
-            end)
-            task.wait(0.1)
-        end
-    end)
-end)
 
--- [12] SKIN CHANGER
-local ChangerData = { Shirt = "", Pants = "", Face = "", Acc = "" }
-local function ApplySkin(character, id, className, parentName)
+-- [12] SKIN CHANGER (DÜZELTİLDİ)
+-- NOT: Kullanıcının Katalog Linki değil, "Görsel (Image) ID'si" girmesi gerekir.
+local ChangerData = { Shirt = "", Pants = "" }
+local function ApplySkin(character, id, className)
     pcall(function()
-        local item = character:FindFirstChildOfClass(className)
-        if not item then item = Instance.new(className, character); item.Name = parentName or className end
         local targetId = "rbxassetid://" .. id
-        pcall(function()
-            local objs = game:GetObjects("rbxassetid://" .. id)
-            if objs and objs[1] then
-                if className == "Shirt" and objs[1]:IsA("Shirt") then targetId = objs[1].ShirtTemplate
-                elseif className == "Pants" and objs[1]:IsA("Pants") then targetId = objs[1].PantsTemplate
-                elseif className == "Decal" and objs[1]:IsA("Decal") then targetId = objs[1].Texture end
-            end
-        end)
-        if className == "Shirt" then item.ShirtTemplate = targetId elseif className == "Pants" then item.PantsTemplate = targetId elseif className == "Decal" then item.Texture = targetId end
+        
+        -- Karakterdeki eski kıyafeti sil
+        for _, v in pairs(character:GetChildren()) do
+            if v:IsA(className) then v:Destroy() end
+        end
+        
+        -- Yeni kıyafeti oluştur ve uygula
+        local newSkin = Instance.new(className)
+        newSkin.Name = className
+        if className == "Shirt" then newSkin.ShirtTemplate = targetId
+        elseif className == "Pants" then newSkin.PantsTemplate = targetId end
+        newSkin.Parent = character
     end)
 end
-CreateTextBox(TabSkinChanger, "Kıyafet ID...", function(txt) ChangerData.Shirt = txt end)
-CreateTextBox(TabSkinChanger, "Pantolon ID...", function(txt) ChangerData.Pants = txt end)
+
+local skinWarn = Instance.new("TextLabel", TabSkinChanger); skinWarn.Size = UDim2.new(1, -15, 0, 20); skinWarn.BackgroundTransparency = 1; skinWarn.Text = "Not: Lütfen 'Image ID' (Görsel ID) giriniz."; skinWarn.TextColor3 = Color3.fromRGB(200, 200, 200); skinWarn.Font = Enum.Font.Gotham; skinWarn.TextSize = 11
+CreateTextBox(TabSkinChanger, "Kıyafet (Shirt) ID...", function(txt) ChangerData.Shirt = txt end)
+CreateTextBox(TabSkinChanger, "Pantolon (Pants) ID...", function(txt) ChangerData.Pants = txt end)
 CreateButton(TabSkinChanger, "Kıyafeti Uygula", function()
     local char = LocalPlayer.Character
     if not char then return end
@@ -389,7 +378,7 @@ CreateButton(TabSkinChanger, "Kıyafeti Uygula", function()
     if ChangerData.Pants ~= "" then ApplySkin(char, ChangerData.Pants, "Pants") end
 end)
 
--- [13] SETTINGS VE PROFİL
+-- [13] SETTINGS & YAĞMUR BUTONU
 local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 6)
 local AvatarImage = Instance.new("ImageLabel", ProfileFrame); AvatarImage.Size = UDim2.new(0, 60, 0, 60); AvatarImage.Position = UDim2.new(0, 10, 0, 10); AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
 pcall(function() local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420); if isReady then AvatarImage.Image = content end end)
@@ -404,8 +393,9 @@ RunService.RenderStepped:Connect(function()
 end)
 
 local MenuKeybind = Enum.KeyCode.RightControl
-CreateToggle(TabSettings, "Arka Plan Kar Efektini Kapat", function(state)
-    SnowEnabled = not state; for _, flake in ipairs(Snowflakes) do flake.obj.Visible = not state end
+CreateToggle(TabSettings, "Arka Plan Yağmur Efektini Kapat", function(state)
+    RainEnabled = not state
+    for _, drop in ipairs(Raindrops) do drop.obj.Visible = not state end
 end)
 
 local KeybindBtn = Instance.new("TextButton", TabSettings); KeybindBtn.Size = UDim2.new(1, -15, 0, 40); KeybindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50); KeybindBtn.Text = "Menü Tuşu: RightControl (Değiştir)"; KeybindBtn.TextColor3 = Color3.new(1,1,1); KeybindBtn.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeybindBtn).CornerRadius = UDim.new(0, 6)
@@ -420,4 +410,4 @@ UserInputService.InputBegan:Connect(function(input, gpe)
     if not gpe and input.KeyCode == MenuKeybind then if Main then Main.Visible = not Main.Visible; if Blur then Blur.Enabled = Main.Visible end end end
 end)
 
-print("FURENT_LSC v23.0 - Fly, Spider & Premium UI Eklendi!")
+print("FURENT_LSC v24.0 - Rain UI & Perfect Egg ESP Yüklendi!")
