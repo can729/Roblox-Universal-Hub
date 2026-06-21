@@ -1,4 +1,4 @@
--- FURENT_LSC v26.0 - VIP EDITION (Eksiksiz Tam Sürüm + Oda Şifre Çözücü ESP)
+-- FURENT_LSC v27.0 - VIP EDITION (Anti-Lag ESP & Yağmur Düzeltmesi)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,7 +8,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- [0] BAĞLANTI TEMİZLİĞİ (Yeniden çalıştırıldığında lag girmemesi için)
+-- [0] BAĞLANTI TEMİZLİĞİ
 if _G.FurentConnections then
     for _, conn in pairs(_G.FurentConnections) do pcall(function() conn:Disconnect() end) end
 end
@@ -24,7 +24,7 @@ pcall(function()
     for _, v in pairs(workspace:GetDescendants()) do if v.Name == "F_RoomESP" then v:Destroy() end end
 end)
 
--- [2] KURŞUN GEÇİRMEZ GUI HEDEFİ (Menünün kesin açılması için)
+-- [2] KURŞUN GEÇİRMEZ GUI HEDEFİ
 local TargetGui = nil
 if gethui then TargetGui = gethui() else
     local success = pcall(function()
@@ -53,10 +53,11 @@ Main.Active = true; Main.Draggable = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = MainGreen; MainStroke.Thickness = 2; MainStroke.Transparency = 0.3
 
--- [4] KUSURSUZ YAĞMUR EFEKTİ (FPS'ten bağımsız, pürüzsüz dt tabanlı)
+-- [4] KUSURSUZ VE TAŞMAYAN YAĞMUR EFEKTİ (Düzeltildi)
 local RainContainer = Instance.new("Frame", Main)
 RainContainer.Size = UDim2.new(1, 0, 1, 0); RainContainer.BackgroundTransparency = 1
 RainContainer.ClipsDescendants = true; RainContainer.ZIndex = 1
+Instance.new("UICorner", RainContainer).CornerRadius = UDim.new(0, 12) -- TAŞMAYI ÖNLEYEN KOD
 
 local Raindrops = {}
 local RainEnabled = true
@@ -187,7 +188,7 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [8] VISUALS (OYUNCU ESP, YUMURTA & ŞİFRE/PUZZLE ÇÖZÜCÜ ESP)
+-- [8] VISUALS (ANTI-LAG ESP)
 local VSettings = { Box = false, Tracer = false, RoomESP = false }
 
 local function ClearRoomESP()
@@ -208,7 +209,14 @@ local function UpdateRoomESP()
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
-    for _, obj in ipairs(workspace:GetDescendants()) do
+    local descendants = workspace:GetDescendants()
+    local count = 0
+
+    for _, obj in ipairs(descendants) do
+        -- ANTI-LAG SİSTEMİ: Oyunu dondurmamak için her 500 objede bir salise nefes aldır.
+        count = count + 1
+        if count % 500 == 0 then task.wait() end 
+
         if obj:IsA("Model") or obj:IsA("BasePart") then
             local rootPart = obj:IsA("BasePart") and obj or (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart"))
             if rootPart then
@@ -216,24 +224,20 @@ local function UpdateRoomESP()
                 if distance < 400 then 
                     local nameL = string.lower(obj.Name)
                     
-                    -- 1. YUMURTA TARAMASI
                     local isEgg = false; local eggText = ""; local eggColor = Color3.fromRGB(255, 215, 0)
                     if nameL:find("egg") or nameL:find("yumurta") then isEgg = true end
                     
-                    for _, desc in ipairs(obj:GetDescendants()) do
+                    for _, desc in ipairs(obj:GetChildren()) do -- Sadece içine baksın (Lag önleme)
                         if desc:IsA("TextLabel") and (desc.Text:find("x") or desc.Text:find("Şans") or desc.Text:find("Yumurta")) then
                             isEgg = true; eggText = desc.Text; eggColor = desc.TextColor3; break
                         end
                     end
                     if isEgg then CreateBillboard(rootPart, "🥚 " .. (eggText ~= "" and eggText or "Yumurta"), eggColor) end
 
-                    -- 2. ŞİFRELİ ODA / BUTON / PUZZLE TARAMASI (YENİ EKLENDİ)
                     local isPuzzle = false; local puzzleText = "🔑 Şifre Butonu"; local puzzleColor = Color3.fromRGB(0, 255, 255)
                     
-                    -- İsimden yakalama veya içinde ProximityPrompt/ClickDetector olan renkli kutuları yakalama
                     if nameL:find("button") or nameL:find("puzzle") or nameL:find("şifre") or nameL:find("switch") or nameL:find("color") or obj:FindFirstChildWhichIsA("ProximityPrompt") or obj:FindFirstChildWhichIsA("ClickDetector") then
                         
-                        -- Eğer bu bir buton/kutu ise sırasını (Order) bulmaya çalış
                         local orderNum = obj:GetAttribute("Order") or obj:GetAttribute("Index") or obj:GetAttribute("Value") or obj:GetAttribute("Sequence")
                         if not orderNum then
                             local val = obj:FindFirstChild("Order") or obj:FindFirstChild("Index") or obj:FindFirstChild("Sequence")
@@ -242,14 +246,10 @@ local function UpdateRoomESP()
 
                         if orderNum or nameL:find("button") or nameL:find("puzzle") then
                             isPuzzle = true
-                            -- Rengini kendi kutusunun renginden alma (Görseldeki gibi kırmızı, mavi kutu vb.)
                             if rootPart:IsA("BasePart") then puzzleColor = rootPart.Color end
                             
-                            if orderNum then
-                                puzzleText = "🎯 TIKLA! SIRA: " .. tostring(orderNum)
-                            else
-                                puzzleText = "🔘 Buton"
-                            end
+                            if orderNum then puzzleText = "🎯 TIKLA! SIRA: " .. tostring(orderNum)
+                            else puzzleText = "🔘 Buton" end
                         end
                     end
                     
@@ -260,18 +260,23 @@ local function UpdateRoomESP()
     end
 end
 
--- Taramayı hızlandırdık (1 saniyede bir günceller, şifreli odalarda hızlı tepki verir)
+-- Taramaların üst üste binip kasma yapmasını engelleyen Queue (Sıra) sistemi
+local isScanning = false
 task.spawn(function()
     while true do
         task.wait(1)
-        if VSettings.RoomESP then pcall(UpdateRoomESP) end
+        if VSettings.RoomESP and not isScanning then 
+            isScanning = true
+            pcall(UpdateRoomESP)
+            isScanning = false
+        end
     end
 end)
 
 CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
 CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then pcall(UpdateRoomESP) else ClearRoomESP() end end)
-CreateButton(TabVisuals, "🔄 Odadaki Şifreleri / Yumurtaları Yenile", function() pcall(UpdateRoomESP) end)
+CreateButton(TabVisuals, "🔄 Odadaki Şifreleri / Yumurtaları Yenile", function() if not isScanning then isScanning = true; pcall(UpdateRoomESP); isScanning = false end end)
 
 local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
 local ESP_Boxes = {}; local ESP_Lines = {}
@@ -436,4 +441,4 @@ AddConnection(UserInputService.InputBegan:Connect(function(input)
     end
 end))
 
-print("FURENT_LSC v26.0 VIP - PUZZLE SOLVER İLE YÜKLENDİ!")
+print("FURENT_LSC v27.0 VIP - LAG FİXLENDİ & YAĞMUR DÜZELTİLDİ!")
