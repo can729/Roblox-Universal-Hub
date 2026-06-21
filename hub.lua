@@ -1,4 +1,4 @@
--- FURENT_LSC v25.0 - VIP EDITION (Eksiksiz Tam Sürüm - Tüm Sekmeler ve Fixler)
+-- FURENT_LSC v26.0 - VIP EDITION (Eksiksiz Tam Sürüm + Oda Şifre Çözücü ESP)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -21,7 +21,7 @@ pcall(function()
     if oldTarget and oldTarget:FindFirstChild("FURENT_PRO_UI") then oldTarget.FURENT_PRO_UI:Destroy() end
     if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FURENT_PRO_UI") then LocalPlayer.PlayerGui.FURENT_PRO_UI:Destroy() end
     if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
-    for _, v in pairs(workspace:GetDescendants()) do if v.Name == "F_EggESP" then v:Destroy() end end
+    for _, v in pairs(workspace:GetDescendants()) do if v.Name == "F_RoomESP" then v:Destroy() end end
 end)
 
 -- [2] KURŞUN GEÇİRMEZ GUI HEDEFİ (Menünün kesin açılması için)
@@ -53,7 +53,7 @@ Main.Active = true; Main.Draggable = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = MainGreen; MainStroke.Thickness = 2; MainStroke.Transparency = 0.3
 
--- [4] KUSURSUZ YAĞMUR EFEKTİ (FPS'ten bağımsız, pürüzsüz)
+-- [4] KUSURSUZ YAĞMUR EFEKTİ (FPS'ten bağımsız, pürüzsüz dt tabanlı)
 local RainContainer = Instance.new("Frame", Main)
 RainContainer.Size = UDim2.new(1, 0, 1, 0); RainContainer.BackgroundTransparency = 1
 RainContainer.ClipsDescendants = true; RainContainer.ZIndex = 1
@@ -74,7 +74,6 @@ for i = 1, 80 do
     table.insert(Raindrops, {obj = drop, spd = speed, swy = sway})
 end
 
--- dt (DeltaTime) eklendi, böylece oyun lagsa bile yağmur pürüzsüz akar
 AddConnection(RunService.RenderStepped:Connect(function(dt)
     if not RainEnabled then return end
     local timeScale = dt * 60 
@@ -114,7 +113,7 @@ local TabContainer = Instance.new("Frame", Main)
 TabContainer.Size = UDim2.new(1, -190, 1, -20); TabContainer.Position = UDim2.new(0, 190, 0, 10)
 TabContainer.BackgroundTransparency = 1; TabContainer.ZIndex = 2
 
--- [6] UI MOTORU (Önceki hatadan arındırılmış tam sağlam motor)
+-- [6] UI MOTORU
 local Tabs = {}
 local function CreateTab(iconText, yPos, isActiveDefault)
     local TabBtn = Instance.new("TextButton", Sidebar)
@@ -155,7 +154,7 @@ end
 
 local function CreateSlider(parent, text, min, max, default, callback)
     local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 60); Container.BackgroundColor3 = LighterBg; Container.ZIndex = 3; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
-    local Stroke = Instance.new("UIStroke", Container); Stroke.Color = Color3.fromRGB(50,50,60) -- BURADAKİ HATA DÜZELTİLDİ
+    local Stroke = Instance.new("UIStroke", Container); Stroke.Color = Color3.fromRGB(50,50,60)
     local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(1, -20, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10); Label.Text = text .. " : " .. default; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1; Label.ZIndex = 3
     local SliderBG = Instance.new("Frame", Container); SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, 40); SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50); SliderBG.ZIndex = 3; Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
     local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0); SliderFill.BackgroundColor3 = MainGreen; SliderFill.ZIndex = 3; Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
@@ -179,7 +178,7 @@ local function CreateTextBox(parent, placeholder, callback)
     TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
 end
 
--- [7] SEKMELER (SİLİNENLER GERİ GETİRİLDİ)
+-- [7] SEKMELER
 local TabVisuals    = CreateTab("👁️ Visuals", 80, true)
 local TabPlayer     = CreateTab("👤 Player", 125, false)
 local TabWorld      = CreateTab("🌍 World", 170, false)
@@ -188,27 +187,37 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [8] VISUALS VE YUMURTA ESP (Geri Getirildi ve Optimize Edildi)
-local VSettings = { Box = false, Tracer = false, EggChams = false }
+-- [8] VISUALS (OYUNCU ESP, YUMURTA & ŞİFRE/PUZZLE ÇÖZÜCÜ ESP)
+local VSettings = { Box = false, Tracer = false, RoomESP = false }
 
-local function ClearEggESP()
-    for _, obj in ipairs(workspace:GetDescendants()) do if obj.Name == "F_EggESP" then obj:Destroy() end end
+local function ClearRoomESP()
+    for _, obj in ipairs(workspace:GetDescendants()) do if obj.Name == "F_RoomESP" then obj:Destroy() end end
 end
 
-local function UpdateEggs()
-    if not VSettings.EggChams then ClearEggESP(); return end
-    ClearEggESP()
+local function CreateBillboard(parent, text, color, offset)
+    local bgui = Instance.new("BillboardGui", parent)
+    bgui.Name = "F_RoomESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 250, 0, 50); bgui.StudsOffset = offset or Vector3.new(0, 5, 0)
+    local lbl = Instance.new("TextLabel", bgui)
+    lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1; lbl.Text = text; lbl.TextColor3 = color
+    lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 16; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
+end
+
+local function UpdateRoomESP()
+    if not VSettings.RoomESP then ClearRoomESP(); return end
+    ClearRoomESP()
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not hrp then return end
 
     for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("Model") then
-            local rootPart = obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart")
+        if obj:IsA("Model") or obj:IsA("BasePart") then
+            local rootPart = obj:IsA("BasePart") and obj or (obj.PrimaryPart or obj:FindFirstChildWhichIsA("BasePart"))
             if rootPart then
                 local distance = (rootPart.Position - hrp.Position).Magnitude
                 if distance < 400 then 
-                    local isEgg = false; local eggText = ""; local eggColor = Color3.fromRGB(255, 215, 0)
                     local nameL = string.lower(obj.Name)
+                    
+                    -- 1. YUMURTA TARAMASI
+                    local isEgg = false; local eggText = ""; local eggColor = Color3.fromRGB(255, 215, 0)
                     if nameL:find("egg") or nameL:find("yumurta") then isEgg = true end
                     
                     for _, desc in ipairs(obj:GetDescendants()) do
@@ -216,33 +225,53 @@ local function UpdateEggs()
                             isEgg = true; eggText = desc.Text; eggColor = desc.TextColor3; break
                         end
                     end
+                    if isEgg then CreateBillboard(rootPart, "🥚 " .. (eggText ~= "" and eggText or "Yumurta"), eggColor) end
+
+                    -- 2. ŞİFRELİ ODA / BUTON / PUZZLE TARAMASI (YENİ EKLENDİ)
+                    local isPuzzle = false; local puzzleText = "🔑 Şifre Butonu"; local puzzleColor = Color3.fromRGB(0, 255, 255)
                     
-                    if isEgg then
-                        local bgui = Instance.new("BillboardGui", rootPart)
-                        bgui.Name = "F_EggESP"; bgui.AlwaysOnTop = true; bgui.Size = UDim2.new(0, 250, 0, 50); bgui.StudsOffset = Vector3.new(0, 5, 0)
-                        local lbl = Instance.new("TextLabel", bgui)
-                        lbl.Size = UDim2.new(1, 0, 1, 0); lbl.BackgroundTransparency = 1
-                        lbl.Text = "🥚 " .. (eggText ~= "" and eggText or "Yumurta")
-                        lbl.TextColor3 = eggColor
-                        lbl.Font = Enum.Font.GothamBlack; lbl.TextSize = 15; lbl.TextStrokeTransparency = 0; lbl.TextStrokeColor3 = Color3.new(0,0,0)
+                    -- İsimden yakalama veya içinde ProximityPrompt/ClickDetector olan renkli kutuları yakalama
+                    if nameL:find("button") or nameL:find("puzzle") or nameL:find("şifre") or nameL:find("switch") or nameL:find("color") or obj:FindFirstChildWhichIsA("ProximityPrompt") or obj:FindFirstChildWhichIsA("ClickDetector") then
+                        
+                        -- Eğer bu bir buton/kutu ise sırasını (Order) bulmaya çalış
+                        local orderNum = obj:GetAttribute("Order") or obj:GetAttribute("Index") or obj:GetAttribute("Value") or obj:GetAttribute("Sequence")
+                        if not orderNum then
+                            local val = obj:FindFirstChild("Order") or obj:FindFirstChild("Index") or obj:FindFirstChild("Sequence")
+                            if val and (val:IsA("NumberValue") or val:IsA("IntValue")) then orderNum = val.Value end
+                        end
+
+                        if orderNum or nameL:find("button") or nameL:find("puzzle") then
+                            isPuzzle = true
+                            -- Rengini kendi kutusunun renginden alma (Görseldeki gibi kırmızı, mavi kutu vb.)
+                            if rootPart:IsA("BasePart") then puzzleColor = rootPart.Color end
+                            
+                            if orderNum then
+                                puzzleText = "🎯 TIKLA! SIRA: " .. tostring(orderNum)
+                            else
+                                puzzleText = "🔘 Buton"
+                            end
+                        end
                     end
+                    
+                    if isPuzzle and not isEgg then CreateBillboard(rootPart, puzzleText, puzzleColor, Vector3.new(0, 3, 0)) end
                 end
             end
         end
     end
 end
 
+-- Taramayı hızlandırdık (1 saniyede bir günceller, şifreli odalarda hızlı tepki verir)
 task.spawn(function()
     while true do
-        task.wait(30)
-        if VSettings.EggChams then pcall(UpdateEggs) end
+        task.wait(1)
+        if VSettings.RoomESP then pcall(UpdateRoomESP) end
     end
 end)
 
 CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
-CreateToggle(TabVisuals, "Yumurta ESP (Oda İçi)", function(s) VSettings.EggChams = s; if s then pcall(UpdateEggs) else ClearEggESP() end end)
-CreateButton(TabVisuals, "🔄 Yumurtaları Şimdi Yenile", function() pcall(UpdateEggs) end)
+CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then pcall(UpdateRoomESP) else ClearRoomESP() end end)
+CreateButton(TabVisuals, "🔄 Odadaki Şifreleri / Yumurtaları Yenile", function() pcall(UpdateRoomESP) end)
 
 local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
 local ESP_Boxes = {}; local ESP_Lines = {}
@@ -317,12 +346,12 @@ AddConnection(RunService.RenderStepped:Connect(function()
     end
 end))
 
--- [10] WORLD MODS (Geri Getirildi)
+-- [10] WORLD MODS
 CreateSlider(TabWorld, "Yerçekimi (Gravity)", 0, 500, 196, function(val) workspace.Gravity = val end)
 CreateSlider(TabWorld, "Saat (ClockTime)", 0, 24, 14, function(val) Lighting.ClockTime = val end)
 CreateToggle(TabWorld, "Sisi Sil (No Fog)", function(state) Lighting.FogEnd = state and 100000 or 1000; local atm = Lighting:FindFirstChildWhichIsA("Atmosphere"); if atm then atm.Density = state and 0 or 0.3 end end)
 
--- [11] TELEPORT (Geri Getirildi)
+-- [11] TELEPORT
 local TargetName = ""
 CreateTextBox(TabTeleport, "Oyuncu Adını Girin...", function(txt) TargetName = string.lower(txt) end)
 CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
@@ -333,7 +362,7 @@ CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
     end
 end)
 
--- [12] AUTOFARM (Geri Getirildi)
+-- [12] AUTOFARM
 local AutoTapOn = false
 CreateToggle(TabAutoFarm, "Auto Clicker (Hızlı Tıklama)", function(state)
     AutoTapOn = state
@@ -345,7 +374,7 @@ CreateToggle(TabAutoFarm, "Auto Clicker (Hızlı Tıklama)", function(state)
     end)
 end)
 
--- [13] SKIN CHANGER (Geri Getirildi)
+-- [13] SKIN CHANGER
 local ChangerData = { Shirt = "", Pants = "" }
 local skinWarn = Instance.new("TextLabel", TabSkinChanger); skinWarn.Size = UDim2.new(1, -15, 0, 20); skinWarn.BackgroundTransparency = 1; skinWarn.Text = "Not: Katalog ID değil, 'Image ID' giriniz."; skinWarn.TextColor3 = Color3.fromRGB(200, 200, 200); skinWarn.Font = Enum.Font.Gotham; skinWarn.TextSize = 12
 CreateTextBox(TabSkinChanger, "Kıyafet (Shirt) Image ID...", function(txt) ChangerData.Shirt = txt end)
@@ -359,7 +388,7 @@ CreateButton(TabSkinChanger, "Kıyafeti Uygula", function()
     end)
 end)
 
--- [14] SETTINGS & PROFİL (GPE Engeli Kaldırıldı ve Yağmur Kapatma Butonu Geri Getirildi)
+-- [14] SETTINGS & PROFİL
 local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ProfileFrame).Color = MainGreen
 local AvatarImage = Instance.new("ImageLabel", ProfileFrame); AvatarImage.Size = UDim2.new(0, 60, 0, 60); AvatarImage.Position = UDim2.new(0, 10, 0, 10); AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
 
@@ -407,4 +436,4 @@ AddConnection(UserInputService.InputBegan:Connect(function(input)
     end
 end))
 
-print("FURENT_LSC v25.0 VIP - Tüm Sekmeler ve Fixler İle Birlikte Yüklendi!")
+print("FURENT_LSC v26.0 VIP - PUZZLE SOLVER İLE YÜKLENDİ!")
