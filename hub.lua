@@ -1,4 +1,4 @@
--- FURENT_LSC v28.0 - ULTRA VIP EDITION (Zero-Lag ESP, Discord Link & Premium UI)
+-- FURENT_LSC v28.1 - ULTRA VIP EDITION (UI Fix, Zero-Lag ESP, Discord Link & Premium UI)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -52,15 +52,16 @@ local LighterBg = Color3.fromRGB(20, 20, 25)
 
 local Main = Instance.new("Frame", ScreenGui)
 Main.Size = UDim2.new(0, 750, 0, 520); Main.Position = UDim2.new(0.5, -375, 0.5, -260)
-Main.BackgroundColor3 = DarkBg; Main.BackgroundTransparency = 0.05 -- Glassmorphism saydamlığı
+Main.BackgroundColor3 = DarkBg; Main.BackgroundTransparency = 0.05
 Main.BorderSizePixel = 0; Main.Active = true; Main.Draggable = true
 Main.ClipsDescendants = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = _G.ThemeColor; MainStroke.Thickness = 2; MainStroke.Transparency = 0.2
 
--- UI Açılış Animasyonu
-Main.Scale = Vector2.new(0.9, 0.9)
-TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = Vector2.new(1, 1)}):Play()
+-- HATASI GİDERİLMİŞ UI AÇILIŞ ANİMASYONU (UIScale Kullanımı)
+local MenuScale = Instance.new("UIScale", Main)
+MenuScale.Scale = 0.8
+TweenService:Create(MenuScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
 -- Buton Hover Efekti Yardımcısı
 local function AddHoverEffect(guiObject, baseColor, hoverColor, transparencyBase, transparencyHover)
@@ -133,7 +134,7 @@ task.spawn(function()
     end
 end)
 
--- YENİ: Tıklanabilir Discord Butonu
+-- Tıklanabilir Discord Butonu
 local DiscordBtn = Instance.new("TextButton", Sidebar)
 DiscordBtn.Size = UDim2.new(1, -20, 0, 40); DiscordBtn.Position = UDim2.new(0, 10, 1, -50)
 DiscordBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 40); DiscordBtn.ZIndex = 3; DiscordBtn.Text = ""
@@ -324,14 +325,12 @@ local function UpdateRoomESP()
     if not hrp then return end
 
     local count = 0
-    local processed = {} -- Aynı objeye birden fazla ESP çizilmesini önler
+    local processed = {}
 
-    -- Sadece gerekli GUI ve objelere odaklanarak yükü %90 hafifletir.
     for _, obj in ipairs(workspace:GetDescendants()) do
         count = count + 1
-        if count % 200 == 0 then task.wait() end -- Donmayı kesinlikle önler
+        if count % 200 == 0 then task.wait() end 
 
-        -- 1. Yumurta Şans Oranlarını Bul (TextLabel)
         if obj:IsA("TextLabel") or obj:IsA("TextButton") then
             local txt = string.lower(obj.Text)
             if txt:find("x") or txt:find("şans") or txt:find("%%") then
@@ -345,7 +344,6 @@ local function UpdateRoomESP()
             end
         end
 
-        -- 2. Butonları ve Şifreleri Bul (ProximityPrompt & ClickDetector)
         if obj:IsA("ProximityPrompt") or obj:IsA("ClickDetector") then
             local rootPart = obj.Parent
             if rootPart and rootPart:IsA("BasePart") and not processed[rootPart] then
@@ -372,7 +370,7 @@ end
 local isScanning = false
 task.spawn(function()
     while true do
-        task.wait(1.5) -- Tarama süresini biraz uzatarak performansı artırdık
+        task.wait(1.5) 
         if VSettings.RoomESP and not isScanning then 
             isScanning = true; pcall(UpdateRoomESP); isScanning = false
         end
@@ -520,22 +518,22 @@ KeybindBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
--- Pürüzsüz Menü Açma/Kapatma
+-- Pürüzsüz Menü Açma/Kapatma Animasyonu Düzeltildi
 AddConnection(UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == MenuKeybind then 
         if Main then 
             if Main.Visible then
-                local closeTween = TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = Vector2.new(0.8, 0.8)})
+                local closeTween = TweenService:Create(MenuScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0.8})
                 closeTween:Play(); Blur.Enabled = false
                 closeTween.Completed:Wait()
                 Main.Visible = false
             else
-                Main.Scale = Vector2.new(0.8, 0.8)
+                MenuScale.Scale = 0.8
                 Main.Visible = true; Blur.Enabled = true
-                TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = Vector2.new(1, 1)}):Play()
+                TweenService:Create(MenuScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
             end
         end 
     end
 end))
 
-print("FURENT_LSC v28.0 ULTRA VIP - SIFIR LAG & PREMIUM TASARIM AKTİF!")
+print("FURENT_LSC v28.1 ULTRA VIP - HATA GİDERİLDİ!")
