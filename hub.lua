@@ -253,6 +253,7 @@ local function LoadMainUI()
             local btnTween = TweenService:Create(Btn, TweenInfo.new(0.1), {Size = UDim2.new(1, -25, 0, 40), Position = UDim2.new(0, 5, 0, 2)}); btnTween:Play(); btnTween.Completed:Wait(); TweenService:Create(Btn, TweenInfo.new(0.1), {Size = UDim2.new(1, -15, 0, 45), Position = UDim2.new(0, 0, 0, 0)}):Play()
             task.spawn(function() pcall(callback) end) 
         end)
+        return Btn
     end
 
     local function CreateSlider(parent, text, min, max, default, callback)
@@ -468,6 +469,21 @@ local function LoadMainUI()
         MenuKeybind = newKey
     end)
     
+    -- DISCORD JOIN BUTTON
+    local DiscordBtn
+    DiscordBtn = CreateButton(TabSettings, "💬 DC JOIN", function()
+        if setclipboard then
+            setclipboard("https://discord.gg/WnFJtJVVHH")
+        elseif toclipboard then
+            toclipboard("https://discord.gg/WnFJtJVVHH")
+        end
+        if DiscordBtn then
+            DiscordBtn.Text = "🔗 LINK COPIED! (Paste in Browser)"
+            task.wait(3)
+            DiscordBtn.Text = "💬 DC JOIN"
+        end
+    end)
+
     CreateButton(TabSettings, "❌ Destroy UI Completely", function()
         ScreenGui:Destroy()
         if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
