@@ -1,4 +1,4 @@
--- FURENT_LSC v27.0 - VIP EDITION (Anti-Lag ESP & Yağmur Düzeltmesi)
+-- FURENT_LSC v27.0 - VIP EDITION (Anti-Lag ESP, Chams & Özel Renk Seçici)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,6 +7,9 @@ local Lighting = game:GetService("Lighting")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
+
+-- GLOBAL TEMA RENGİ
+_G.ThemeColor = Color3.fromRGB(0, 255, 120)
 
 -- [0] BAĞLANTI TEMİZLİĞİ
 if _G.FurentConnections then
@@ -42,7 +45,6 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "FURENT_PRO_UI"; ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling; ScreenGui.Parent = TargetGui
 
-local MainGreen = Color3.fromRGB(0, 255, 120)
 local DarkBg = Color3.fromRGB(12, 12, 16)
 local LighterBg = Color3.fromRGB(20, 20, 25)
 
@@ -51,13 +53,13 @@ Main.Size = UDim2.new(0, 750, 0, 520); Main.Position = UDim2.new(0.5, -375, 0.5,
 Main.BackgroundColor3 = DarkBg; Main.BorderSizePixel = 0
 Main.Active = true; Main.Draggable = true
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
-local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = MainGreen; MainStroke.Thickness = 2; MainStroke.Transparency = 0.3
+local MainStroke = Instance.new("UIStroke", Main); MainStroke.Color = _G.ThemeColor; MainStroke.Thickness = 2; MainStroke.Transparency = 0.3
 
 -- [4] KUSURSUZ VE TAŞMAYAN YAĞMUR EFEKTİ (Düzeltildi)
 local RainContainer = Instance.new("Frame", Main)
 RainContainer.Size = UDim2.new(1, 0, 1, 0); RainContainer.BackgroundTransparency = 1
 RainContainer.ClipsDescendants = true; RainContainer.ZIndex = 1
-Instance.new("UICorner", RainContainer).CornerRadius = UDim.new(0, 12) -- TAŞMAYI ÖNLEYEN KOD
+Instance.new("UICorner", RainContainer).CornerRadius = UDim.new(0, 12)
 
 local Raindrops = {}
 local RainEnabled = true
@@ -90,18 +92,31 @@ local Sidebar = Instance.new("Frame", Main)
 Sidebar.Size = UDim2.new(0, 180, 1, 0); Sidebar.BackgroundColor3 = Color3.fromRGB(8, 8, 10); Sidebar.ZIndex = 2
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 12)
 local SidebarLine = Instance.new("Frame", Sidebar)
-SidebarLine.Size = UDim2.new(0, 2, 1, 0); SidebarLine.Position = UDim2.new(1, -2, 0, 0); SidebarLine.BackgroundColor3 = MainGreen; SidebarLine.BorderSizePixel = 0; SidebarLine.ZIndex = 3
+SidebarLine.Size = UDim2.new(0, 2, 1, 0); SidebarLine.Position = UDim2.new(1, -2, 0, 0); SidebarLine.BackgroundColor3 = _G.ThemeColor; SidebarLine.BorderSizePixel = 0; SidebarLine.ZIndex = 3
 
 local Title = Instance.new("TextLabel", Sidebar)
 Title.Size = UDim2.new(1, 0, 0, 60); Title.Position = UDim2.new(0, 0, 0, 5)
 Title.Text = "FURENT LSC"; Title.TextColor3 = Color3.new(1,1,1)
 Title.Font = Enum.Font.GothamBlack; Title.TextSize = 22; Title.BackgroundTransparency = 1; Title.ZIndex = 3
 local TitleGradient = Instance.new("UIGradient", Title)
-TitleGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, MainGreen), ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1, MainGreen)}
 
 task.spawn(function()
     local rot = 0
-    while task.wait(0.05) do rot = rot + 2; if rot >= 360 then rot = 0 end; pcall(function() TitleGradient.Rotation = rot end) end
+    while task.wait(0.015) do -- Animasyon hızlandırıldı
+        rot = rot + 4 
+        if rot >= 360 then rot = 0 end
+        pcall(function() 
+            TitleGradient.Rotation = rot 
+            -- Rengi dinamik olarak güncelliyoruz
+            TitleGradient.Color = ColorSequence.new{
+                ColorSequenceKeypoint.new(0, _G.ThemeColor), 
+                ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 255, 255)), 
+                ColorSequenceKeypoint.new(1, _G.ThemeColor)
+            }
+            SidebarLine.BackgroundColor3 = _G.ThemeColor
+            MainStroke.Color = _G.ThemeColor
+        end) 
+    end
 end)
 
 local DiscordFrame = Instance.new("Frame", Sidebar)
@@ -120,22 +135,22 @@ local function CreateTab(iconText, yPos, isActiveDefault)
     local TabBtn = Instance.new("TextButton", Sidebar)
     TabBtn.Size = UDim2.new(0, 160, 0, 38); TabBtn.Position = UDim2.new(0, 10, 0, yPos); TabBtn.Text = "  " .. iconText
     TabBtn.TextColor3 = isActiveDefault and Color3.new(1,1,1) or Color3.fromRGB(150,150,150)
-    TabBtn.BackgroundColor3 = isActiveDefault and MainGreen or Color3.fromRGB(15, 15, 20)
+    TabBtn.BackgroundColor3 = isActiveDefault and _G.ThemeColor or Color3.fromRGB(15, 15, 20)
     TabBtn.BackgroundTransparency = isActiveDefault and 0.8 or 0
     TabBtn.Font = Enum.Font.GothamBold; TabBtn.TextSize = 14; TabBtn.TextXAlignment = Enum.TextXAlignment.Left; TabBtn.ZIndex = 3
     Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 6)
-    local Stroke = Instance.new("UIStroke", TabBtn); Stroke.Color = MainGreen; Stroke.Transparency = isActiveDefault and 0 or 1
+    local Stroke = Instance.new("UIStroke", TabBtn); Stroke.Color = _G.ThemeColor; Stroke.Transparency = isActiveDefault and 0 or 1
     
     local TabPage = Instance.new("ScrollingFrame", TabContainer)
     TabPage.Size = UDim2.new(1, 0, 1, 0); TabPage.BackgroundTransparency = 1
-    TabPage.ScrollBarThickness = 4; TabPage.ScrollBarImageColor3 = MainGreen; TabPage.Visible = isActiveDefault; TabPage.ZIndex = 3
+    TabPage.ScrollBarThickness = 4; TabPage.ScrollBarImageColor3 = Color3.fromRGB(150,150,150); TabPage.Visible = isActiveDefault; TabPage.ZIndex = 3
     TabPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
     local UIListLayout = Instance.new("UIListLayout", TabPage); UIListLayout.Padding = UDim.new(0, 12); UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
     
     table.insert(Tabs, {Btn = TabBtn, Page = TabPage, Strk = Stroke})
     TabBtn.MouseButton1Click:Connect(function()
         for _, t in pairs(Tabs) do t.Btn.BackgroundColor3 = Color3.fromRGB(15, 15, 20); t.Btn.BackgroundTransparency = 0; t.Btn.TextColor3 = Color3.fromRGB(150,150,150); t.Strk.Transparency = 1; t.Page.Visible = false end
-        TabBtn.BackgroundColor3 = MainGreen; TabBtn.BackgroundTransparency = 0.8; TabBtn.TextColor3 = Color3.new(1,1,1); Stroke.Transparency = 0; TabPage.Visible = true
+        TabBtn.BackgroundColor3 = _G.ThemeColor; TabBtn.BackgroundTransparency = 0.8; TabBtn.TextColor3 = Color3.new(1,1,1); Stroke.Color = _G.ThemeColor; Stroke.Transparency = 0; TabPage.Visible = true
     end)
     return TabPage
 end
@@ -145,11 +160,11 @@ local function CreateToggle(parent, text, callback)
     local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(0.8, 0, 1, 0); Label.Position = UDim2.new(0, 15, 0, 0); Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1; Label.ZIndex = 3
     local ToggleBtn = Instance.new("TextButton", Container); ToggleBtn.Size = UDim2.new(0, 44, 0, 22); ToggleBtn.Position = UDim2.new(1, -60, 0.5, -11); ToggleBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60); ToggleBtn.Text = ""; ToggleBtn.ZIndex = 3; Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(1, 0)
     local state = false
-    ToggleBtn.MouseButton1Click:Connect(function() state = not state; ToggleBtn.BackgroundColor3 = state and MainGreen or Color3.fromRGB(50, 50, 60); task.spawn(function() pcall(callback, state) end) end)
+    ToggleBtn.MouseButton1Click:Connect(function() state = not state; ToggleBtn.BackgroundColor3 = state and _G.ThemeColor or Color3.fromRGB(50, 50, 60); task.spawn(function() pcall(callback, state) end) end)
 end
 
 local function CreateButton(parent, text, callback)
-    local Btn = Instance.new("TextButton", parent); Btn.Size = UDim2.new(1, -15, 0, 45); Btn.BackgroundColor3 = MainGreen; Btn.BackgroundTransparency = 0.1; Btn.Text = text; Btn.TextColor3 = Color3.new(0, 0, 0); Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 14; Btn.ZIndex = 3; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+    local Btn = Instance.new("TextButton", parent); Btn.Size = UDim2.new(1, -15, 0, 45); Btn.BackgroundColor3 = _G.ThemeColor; Btn.BackgroundTransparency = 0.5; Btn.Text = text; Btn.TextColor3 = Color3.new(1, 1, 1); Btn.Font = Enum.Font.GothamBold; Btn.TextSize = 14; Btn.ZIndex = 3; Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
     Btn.MouseButton1Click:Connect(function() task.spawn(function() pcall(callback) end) end)
 end
 
@@ -158,7 +173,7 @@ local function CreateSlider(parent, text, min, max, default, callback)
     local Stroke = Instance.new("UIStroke", Container); Stroke.Color = Color3.fromRGB(50,50,60)
     local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(1, -20, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10); Label.Text = text .. " : " .. default; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1; Label.ZIndex = 3
     local SliderBG = Instance.new("Frame", Container); SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, 40); SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50); SliderBG.ZIndex = 3; Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
-    local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0); SliderFill.BackgroundColor3 = MainGreen; SliderFill.ZIndex = 3; Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+    local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0); SliderFill.BackgroundColor3 = _G.ThemeColor; SliderFill.ZIndex = 3; Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
     local dragging = false
     SliderBG.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
@@ -175,8 +190,57 @@ local function CreateTextBox(parent, placeholder, callback)
     local TextBox = Instance.new("TextBox", parent); TextBox.Size = UDim2.new(1, -15, 0, 45)
     TextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25); TextBox.PlaceholderText = placeholder; TextBox.Text = ""
     TextBox.TextColor3 = Color3.new(1,1,1); TextBox.Font = Enum.Font.Gotham; TextBox.TextSize = 14; TextBox.ZIndex = 3
-    Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", TextBox).Color = MainGreen
+    Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", TextBox).Color = _G.ThemeColor
     TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
+end
+
+local function CreateColorPicker(parent, text)
+    local Container = Instance.new("Frame", parent)
+    Container.Size = UDim2.new(1, -15, 0, 110); Container.BackgroundColor3 = LighterBg
+    Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6)
+    Instance.new("UIStroke", Container).Color = Color3.fromRGB(50, 50, 60)
+
+    local Label = Instance.new("TextLabel", Container)
+    Label.Size = UDim2.new(1, -60, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10)
+    Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14
+    Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
+
+    local PreviewBox = Instance.new("Frame", Container)
+    PreviewBox.Size = UDim2.new(0, 30, 0, 30); PreviewBox.Position = UDim2.new(1, -45, 0, 5)
+    PreviewBox.BackgroundColor3 = _G.ThemeColor
+    Instance.new("UICorner", PreviewBox).CornerRadius = UDim.new(0, 4)
+
+    local currentColor = {R = _G.ThemeColor.R*255, G = _G.ThemeColor.G*255, B = _G.ThemeColor.B*255}
+
+    local function UpdateColor()
+        _G.ThemeColor = Color3.fromRGB(currentColor.R, currentColor.G, currentColor.B)
+        PreviewBox.BackgroundColor3 = _G.ThemeColor
+    end
+
+    local function addMinSlider(yPos, colorName, key)
+        local SliderBG = Instance.new("Frame", Container)
+        SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, yPos)
+        SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+        Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
+        local SliderFill = Instance.new("Frame", SliderBG)
+        SliderFill.Size = UDim2.new(currentColor[key]/255, 0, 1, 0)
+        SliderFill.BackgroundColor3 = Color3.fromRGB(key=="R" and 255 or 0, key=="G" and 255 or 0, key=="B" and 255 or 0)
+        Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
+
+        local dragging = false
+        SliderBG.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = true end end)
+        UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local relX = math.clamp((UserInputService:GetMouseLocation().X - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1)
+                SliderFill.Size = UDim2.new(relX, 0, 1, 0)
+                currentColor[key] = math.floor(255 * relX)
+                UpdateColor()
+            end
+        end)
+    end
+
+    addMinSlider(45, "R", "R"); addMinSlider(65, "G", "G"); addMinSlider(85, "B", "B")
 end
 
 -- [7] SEKMELER
@@ -188,8 +252,8 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [8] VISUALS (ANTI-LAG ESP)
-local VSettings = { Box = false, Tracer = false, RoomESP = false }
+-- [8] VISUALS (ANTI-LAG ESP & CHAMS)
+local VSettings = { Box = false, Tracer = false, RoomESP = false, Chams = false }
 
 local function ClearRoomESP()
     for _, obj in ipairs(workspace:GetDescendants()) do if obj.Name == "F_RoomESP" then obj:Destroy() end end
@@ -213,7 +277,6 @@ local function UpdateRoomESP()
     local count = 0
 
     for _, obj in ipairs(descendants) do
-        -- ANTI-LAG SİSTEMİ: Oyunu dondurmamak için her 500 objede bir salise nefes aldır.
         count = count + 1
         if count % 500 == 0 then task.wait() end 
 
@@ -227,8 +290,9 @@ local function UpdateRoomESP()
                     local isEgg = false; local eggText = ""; local eggColor = Color3.fromRGB(255, 215, 0)
                     if nameL:find("egg") or nameL:find("yumurta") then isEgg = true end
                     
-                    for _, desc in ipairs(obj:GetChildren()) do -- Sadece içine baksın (Lag önleme)
-                        if desc:IsA("TextLabel") and (desc.Text:find("x") or desc.Text:find("Şans") or desc.Text:find("Yumurta")) then
+                    -- DÜZELTME: GetDescendants ile Gui'lerin içine kadar iniyoruz
+                    for _, desc in ipairs(obj:GetDescendants()) do 
+                        if desc:IsA("TextLabel") and (desc.Text:lower():find("x") or desc.Text:lower():find("şans") or desc.Text:find("%%")) then
                             isEgg = true; eggText = desc.Text; eggColor = desc.TextColor3; break
                         end
                     end
@@ -247,7 +311,6 @@ local function UpdateRoomESP()
                         if orderNum or nameL:find("button") or nameL:find("puzzle") then
                             isPuzzle = true
                             if rootPart:IsA("BasePart") then puzzleColor = rootPart.Color end
-                            
                             if orderNum then puzzleText = "🎯 TIKLA! SIRA: " .. tostring(orderNum)
                             else puzzleText = "🔘 Buton" end
                         end
@@ -260,7 +323,6 @@ local function UpdateRoomESP()
     end
 end
 
--- Taramaların üst üste binip kasma yapmasını engelleyen Queue (Sıra) sistemi
 local isScanning = false
 task.spawn(function()
     while true do
@@ -275,20 +337,43 @@ end)
 
 CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
+CreateToggle(TabVisuals, "Chams (Oyuncu Görünürlüğü)", function(s) VSettings.Chams = s end)
 CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then pcall(UpdateRoomESP) else ClearRoomESP() end end)
 CreateButton(TabVisuals, "🔄 Odadaki Şifreleri / Yumurtaları Yenile", function() if not isScanning then isScanning = true; pcall(UpdateRoomESP); isScanning = false end end)
 
 local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
 local ESP_Boxes = {}; local ESP_Lines = {}
 
-if DrawingSupported then
-    AddConnection(RunService.RenderStepped:Connect(function()
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= LocalPlayer then
+AddConnection(RunService.RenderStepped:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            -- Chams Güncellemesi
+            if player.Character then
+                if VSettings.Chams then
+                    local hl = player.Character:FindFirstChild("FurentChams")
+                    if not hl then
+                        hl = Instance.new("Highlight")
+                        hl.Name = "FurentChams"
+                        hl.Parent = player.Character
+                    end
+                    hl.FillColor = _G.ThemeColor
+                    hl.OutlineColor = Color3.new(1,1,1)
+                    hl.FillTransparency = 0.5
+                    hl.OutlineTransparency = 0
+                    hl.Enabled = true
+                else
+                    if player.Character:FindFirstChild("FurentChams") then
+                        player.Character.FurentChams.Enabled = false
+                    end
+                end
+            end
+
+            -- ESP Box & Tracer
+            if DrawingSupported then
                 if not ESP_Boxes[player] then
                     pcall(function()
                         ESP_Boxes[player] = Drawing.new("Square"); ESP_Boxes[player].Thickness = 1.5; ESP_Boxes[player].Filled = false
-                        ESP_Lines[player] = Drawing.new("Line"); ESP_Lines[player].Color = MainGreen; ESP_Lines[player].Thickness = 1
+                        ESP_Lines[player] = Drawing.new("Line"); ESP_Lines[player].Thickness = 1
                     end)
                 end
                 local box = ESP_Boxes[player]; local line = ESP_Lines[player]
@@ -296,18 +381,20 @@ if DrawingSupported then
                     if (VSettings.Box or VSettings.Tracer) and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                         local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
                         if onScreen then
-                            if VSettings.Box then box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z); box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2); box.Color = player.TeamColor.Color; box.Visible = true else box.Visible = false end
-                            if VSettings.Tracer then line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y); line.To = Vector2.new(pos.X, pos.Y); line.Visible = true else line.Visible = false end
+                            if VSettings.Box then box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z); box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2); box.Color = _G.ThemeColor; box.Visible = true else box.Visible = false end
+                            if VSettings.Tracer then line.Color = _G.ThemeColor; line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y); line.To = Vector2.new(pos.X, pos.Y); line.Visible = true else line.Visible = false end
                         else box.Visible = false; line.Visible = false end
                     else box.Visible = false; line.Visible = false end
                 end
             end
         end
-    end))
-else
+    end
+end))
+
+if not DrawingSupported then
     local WarnLabel = Instance.new("TextLabel", TabVisuals)
     WarnLabel.Size = UDim2.new(1, -15, 0, 30); WarnLabel.BackgroundTransparency = 1
-    WarnLabel.Text = "⚠️ Executorunuz Drawing API desteklemiyor."; WarnLabel.TextColor3 = Color3.fromRGB(255, 70, 70); WarnLabel.Font = Enum.Font.GothamBold; WarnLabel.TextSize = 12
+    WarnLabel.Text = "⚠️ Executorunuz Drawing API desteklemiyor. (Box ve Tracer çalışmaz)"; WarnLabel.TextColor3 = Color3.fromRGB(255, 70, 70); WarnLabel.Font = Enum.Font.GothamBold; WarnLabel.TextSize = 12
 end
 
 -- [9] PLAYER MODS
@@ -394,7 +481,7 @@ CreateButton(TabSkinChanger, "Kıyafeti Uygula", function()
 end)
 
 -- [14] SETTINGS & PROFİL
-local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ProfileFrame).Color = MainGreen
+local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ProfileFrame).Color = Color3.fromRGB(50, 50, 60)
 local AvatarImage = Instance.new("ImageLabel", ProfileFrame); AvatarImage.Size = UDim2.new(0, 60, 0, 60); AvatarImage.Position = UDim2.new(0, 10, 0, 10); AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
 
 task.spawn(function()
@@ -404,7 +491,7 @@ task.spawn(function()
     end)
 end)
 
-local NameLabel = Instance.new("TextLabel", ProfileFrame); NameLabel.Size = UDim2.new(1, -90, 0, 30); NameLabel.Position = UDim2.new(0, 80, 0, 10); NameLabel.BackgroundTransparency = 1; NameLabel.Text = "👤 " .. LocalPlayer.Name; NameLabel.TextColor3 = MainGreen; NameLabel.Font = Enum.Font.GothamBold; NameLabel.TextXAlignment = Enum.TextXAlignment.Left; NameLabel.TextSize = 16
+local NameLabel = Instance.new("TextLabel", ProfileFrame); NameLabel.Size = UDim2.new(1, -90, 0, 30); NameLabel.Position = UDim2.new(0, 80, 0, 10); NameLabel.BackgroundTransparency = 1; NameLabel.Text = "👤 " .. LocalPlayer.Name; NameLabel.TextColor3 = Color3.new(1,1,1); NameLabel.Font = Enum.Font.GothamBold; NameLabel.TextXAlignment = Enum.TextXAlignment.Left; NameLabel.TextSize = 16
 local TimeLabel = Instance.new("TextLabel", ProfileFrame); TimeLabel.Size = UDim2.new(1, -90, 0, 30); TimeLabel.Position = UDim2.new(0, 80, 0, 40); TimeLabel.BackgroundTransparency = 1; TimeLabel.Text = "⏱️ Oynama Süresi: 00:00:00"; TimeLabel.TextColor3 = Color3.new(1, 1, 1); TimeLabel.Font = Enum.Font.Gotham; TimeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 local StartTime = tick()
@@ -412,6 +499,9 @@ AddConnection(RunService.RenderStepped:Connect(function()
     local elapsed = tick() - StartTime
     TimeLabel.Text = string.format("⏱️ Oynama Süresi: %02d:%02d:%02d", math.floor(elapsed / 3600), math.floor((elapsed % 3600) / 60), math.floor(elapsed % 60))
 end))
+
+-- YENİ: RENK SEÇİCİ (COLOR PICKER)
+CreateColorPicker(TabSettings, "Arayüz Tema Rengini Ayarla")
 
 CreateToggle(TabSettings, "Arka Plan Yağmurunu Kapat", function(state)
     RainEnabled = not state
@@ -441,4 +531,4 @@ AddConnection(UserInputService.InputBegan:Connect(function(input)
     end
 end))
 
-print("FURENT_LSC v27.0 VIP - LAG FİXLENDİ & YAĞMUR DÜZELTİLDİ!")
+print("FURENT_LSC v27.0 VIP - LAG FİXLENDİ, YAĞMUR DÜZELTİLDİ, COLOR PICKER EKLENDİ!")
