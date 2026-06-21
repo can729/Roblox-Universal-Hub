@@ -1,4 +1,4 @@
--- FURENT_LSC v25.0 - VIP EDITION (Eğitimsel Optimizasyon Sürümü)
+-- FURENT_LSC v25.0 - VIP EDITION (Eğitimsel Video & Kesin Çözüm Sürümü)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8,8 +8,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- [0] BAĞLANTI (CONNECTION) TEMİZLİĞİ - LAG ÖNLEYİCİ
--- Script her çalıştığında önceki döngüleri durdurur
+-- [0] BAĞLANTI (CONNECTION) TEMİZLİĞİ - RE-EXECUTE LAG ÖNLEYİCİ
 if _G.FurentConnections then
     for _, conn in pairs(_G.FurentConnections) do
         pcall(function() conn:Disconnect() end)
@@ -19,41 +18,67 @@ _G.FurentConnections = {}
 local function AddConnection(conn) table.insert(_G.FurentConnections, conn) end
 
 -- [1] ESKİ KALINTILARI TEMİZLE
-local TargetGui = nil
-pcall(function() TargetGui = (gethui and gethui()) or game:GetService("CoreGui") end)
-if not TargetGui or not pcall(function() local _ = TargetGui.Name end) then TargetGui = LocalPlayer:WaitForChild("PlayerGui") end
-
 pcall(function()
-    if TargetGui:FindFirstChild("FURENT_PRO_UI") then TargetGui.FURENT_PRO_UI:Destroy() end
+    local oldTarget = (gethui and gethui()) or game:GetService("CoreGui") or LocalPlayer:FindFirstChild("PlayerGui")
+    if oldTarget and oldTarget:FindFirstChild("FURENT_PRO_UI") then oldTarget.FURENT_PRO_UI:Destroy() end
+    if LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("FURENT_PRO_UI") then LocalPlayer.PlayerGui.FURENT_PRO_UI:Destroy() end
     if Lighting:FindFirstChild("FURENT_Blur") then Lighting.FURENT_Blur:Destroy() end
-    for _, v in pairs(workspace:GetDescendants()) do
-        if v.Name == "F_EggESP" then v:Destroy() end
-    end
+    for _, v in pairs(workspace:GetDescendants()) do if v.Name == "F_EggESP" then v:Destroy() end end
 end)
 
--- [2] MODERN ANA ARAYÜZ (UI)
+-- [2] KURŞUN GEÇİRMEZ GUI CONTAINER SEÇİMİ (ÇÖKMEYİ ÖNLEYEN KRİTİK KISIM)
+local TargetGui = nil
+if gethui then
+    TargetGui = gethui()
+else
+    local coreGui = game:GetService("CoreGui")
+    -- Gerçekten CoreGui içine bir şey yazıp yazamayacağımızı test ediyoruz
+    local success = pcall(function()
+        local testFolder = Instance.new("Folder")
+        testFolder.Parent = coreGui
+        testFolder:Destroy()
+    end)
+    if success then
+        TargetGui = coreGui
+    else
+        TargetGui = LocalPlayer:WaitForChild("PlayerGui")
+    end
+end
+
+-- [3] MODERN ANA ARAYÜZ (UI) OLUŞTURMA
 local Blur = Instance.new("BlurEffect")
 Blur.Name = "FURENT_Blur"; Blur.Size = 15; Blur.Enabled = true
 pcall(function() Blur.Parent = Lighting end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FURENT_PRO_UI"; ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "FURENT_PRO_UI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+ScreenGui.Enabled = true
 ScreenGui.Parent = TargetGui
 
 local MainGreen = Color3.fromRGB(0, 255, 120)
 local DarkBg = Color3.fromRGB(12, 12, 16)
 local LighterBg = Color3.fromRGB(20, 20, 25)
 
-local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 750, 0, 520); Main.Position = UDim2.new(0.5, -375, 0.5, -260)
-Main.BackgroundColor3 = DarkBg; Main.BorderSizePixel = 0
-Main.Active = true; Main.Draggable = true
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+local Main = Instance.new("Frame")
+Main.Name = "MainFrame"
+Main.Size = UDim2.new(0, 750, 0, 520)
+Main.Position = UDim2.new(0.5, -375, 0.5, -260)
+Main.BackgroundColor3 = DarkBg
+Main.BorderSizePixel = 0
+Main.Active = true
+Main.Draggable = true
+Main.Visible = true -- İlk başta ekranda görünür başlasın
+Main.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner", Main)
+UICorner.CornerRadius = UDim.new(0, 12)
 
 local MainStroke = Instance.new("UIStroke", Main)
 MainStroke.Color = MainGreen; MainStroke.Thickness = 2; MainStroke.Transparency = 0.3
 
--- [3] YAĞMUR EFEKTİ
+-- [4] MENÜ İÇİ YAĞMUR EFEKTİ
 local RainContainer = Instance.new("Frame", Main)
 RainContainer.Size = UDim2.new(1, 0, 1, 0); RainContainer.BackgroundTransparency = 1
 RainContainer.ClipsDescendants = true; RainContainer.ZIndex = 1
@@ -86,7 +111,7 @@ AddConnection(RunService.RenderStepped:Connect(function()
     end
 end))
 
--- [4] SOL MENÜ & LOGO
+-- [5] SOL MENÜ & LOGO ANİMASYONU
 local Sidebar = Instance.new("Frame", Main)
 Sidebar.Size = UDim2.new(0, 180, 1, 0); Sidebar.BackgroundColor3 = Color3.fromRGB(8, 8, 10); Sidebar.ZIndex = 2
 Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 12)
@@ -108,14 +133,29 @@ TitleGradient.Color = ColorSequence.new{
 
 task.spawn(function()
     local rot = 0
-    while task.wait(0.05) do rot = rot + 2; if rot >= 360 then rot = 0 end; pcall(function() TitleGradient.Rotation = rot end) end
+    while task.wait(0.05) do 
+        rot = rot + 2; if rot >= 360 then rot = 0 end
+        pcall(function() TitleGradient.Rotation = rot end) 
+    end
 end)
+
+-- Discord Etiketi
+local DiscordFrame = Instance.new("Frame", Sidebar)
+DiscordFrame.Size = UDim2.new(1, -20, 0, 40); DiscordFrame.Position = UDim2.new(0, 10, 1, -50)
+DiscordFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 40); DiscordFrame.ZIndex = 3
+Instance.new("UICorner", DiscordFrame).CornerRadius = UDim.new(0, 8)
+Instance.new("UIStroke", DiscordFrame).Color = Color3.fromRGB(88, 101, 242)
+
+local DiscordLabel = Instance.new("TextLabel", DiscordFrame)
+DiscordLabel.Size = UDim2.new(1, 0, 1, 0); DiscordLabel.BackgroundTransparency = 1
+DiscordLabel.Text = "Discord: eren01_."; DiscordLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+DiscordLabel.Font = Enum.Font.GothamBold; DiscordLabel.TextSize = 12; DiscordLabel.ZIndex = 3
 
 local TabContainer = Instance.new("Frame", Main)
 TabContainer.Size = UDim2.new(1, -190, 1, -20); TabContainer.Position = UDim2.new(0, 190, 0, 10)
 TabContainer.BackgroundTransparency = 1; TabContainer.ZIndex = 2
 
--- [5] UI MOTORU
+-- [6] UI MOTORU VE ELEMENTLERİ
 local Tabs = {}
 local function CreateTab(iconText, yPos, isActiveDefault)
     local TabBtn = Instance.new("TextButton", Sidebar)
@@ -130,7 +170,7 @@ local function CreateTab(iconText, yPos, isActiveDefault)
     local TabPage = Instance.new("ScrollingFrame", TabContainer)
     TabPage.Size = UDim2.new(1, 0, 1, 0); TabPage.BackgroundTransparency = 1
     TabPage.ScrollBarThickness = 4; TabPage.ScrollBarImageColor3 = MainGreen; TabPage.Visible = isActiveDefault; TabPage.ZIndex = 3
-    TabPage.AutomaticCanvasSize = Enum.AutomaticSize.Y -- KAYDIRMA ÇUBUĞU SORUNU BURADA ÇÖZÜLDÜ
+    TabPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
     
     local UIListLayout = Instance.new("UIListLayout", TabPage)
     UIListLayout.Padding = UDim.new(0, 12); UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -157,7 +197,7 @@ local function CreateButton(parent, text, callback)
 end
 
 local function CreateSlider(parent, text, min, max, default, callback)
-    local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 60); Container.BackgroundColor3 = LighterBg; Container.ZIndex = 3; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(50,50,60)
+    local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 60); Container.BackgroundColor3 = LighterBg; Container.ZIndex = 3; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Container.Bronze = Instance.new("UIStroke", Container); Container.UIStroke.Color = Color3.fromRGB(50,50,60)
     local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(1, -20, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10); Label.Text = text .. " : " .. default; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1; Label.ZIndex = 3
     local SliderBG = Instance.new("Frame", Container); SliderBG.Size = UDim2.new(1, -30, 0, 8); SliderBG.Position = UDim2.new(0, 15, 0, 40); SliderBG.BackgroundColor3 = Color3.fromRGB(40, 40, 50); SliderBG.ZIndex = 3; Instance.new("UICorner", SliderBG).CornerRadius = UDim.new(1, 0)
     local SliderFill = Instance.new("Frame", SliderBG); SliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0); SliderFill.BackgroundColor3 = MainGreen; SliderFill.ZIndex = 3; Instance.new("UICorner", SliderFill).CornerRadius = UDim.new(1, 0)
@@ -181,7 +221,7 @@ local function CreateTextBox(parent, placeholder, callback)
     TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
 end
 
--- [6] SEKMELER
+-- [7] SEKMELERİ YÜKLE
 local TabVisuals    = CreateTab("👁️ Visuals", 80, true)
 local TabPlayer     = CreateTab("👤 Player", 125, false)
 local TabWorld      = CreateTab("🌍 World", 170, false)
@@ -190,9 +230,8 @@ local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
 local TabSkinChanger= CreateTab("🎭 Skin Changer", 305, false)
 local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
--- [7] GÖRSEL ÖZELLİKLER VE ESP
-local VSettings = { Box = false, Tracer = false, EggChams = false }
-
+-- [8] VISUALS (ESP) AYARLARI
+local VSettings = { Box = false, Tracer = false }
 CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
 CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
 
@@ -224,15 +263,14 @@ if DrawingSupported then
     end))
 else
     local WarnLabel = Instance.new("TextLabel", TabVisuals)
-    WarnLabel.Size = UDim2.new(1, -15, 0, 20); WarnLabel.BackgroundTransparency = 1
-    WarnLabel.Text = "⚠️ Executorunuz Drawing API desteklemiyor! ESP Kullanılamaz."; WarnLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
+    WarnLabel.Size = UDim2.new(1, -15, 0, 30); WarnLabel.BackgroundTransparency = 1
+    WarnLabel.Text = "⚠️ Executorunuz Drawing API desteklemiyor."; WarnLabel.TextColor3 = Color3.fromRGB(255, 70, 70); WarnLabel.Font = Enum.Font.GothamBold; WarnLabel.TextSize = 12
 end
 
--- [8] OYUNCU HAREKETLERİ (PLAYER)
-local PSettings = { Speed = 16, Jump = 50, Fly = false, FlySpeed = 50, Spider = false }
+-- [9] PLAYER MODS
+local PSettings = { Speed = 16, Jump = 50, Fly = false, FlySpeed = 50 }
 CreateToggle(TabPlayer, "Fly (Uçma - WASD/Boşluk)", function(s) PSettings.Fly = s end)
 CreateSlider(TabPlayer, "Fly Hızı", 10, 300, 50, function(val) PSettings.FlySpeed = val end)
-CreateToggle(TabPlayer, "Spider (Duvara Tırmanma)", function(s) PSettings.Spider = s end)
 CreateSlider(TabPlayer, "Walk Speed", 16, 300, 16, function(val) PSettings.Speed = val end)
 CreateSlider(TabPlayer, "Jump Power", 50, 400, 50, function(val) PSettings.Jump = val end)
 
@@ -264,11 +302,10 @@ AddConnection(RunService.RenderStepped:Connect(function()
     end
 end))
 
--- [9] SETTINGS & PROFİL
+-- [10] SETTINGS & PROFİL (GPE HATASI BURADA GİDERİLDİ)
 local ProfileFrame = Instance.new("Frame", TabSettings); ProfileFrame.Size = UDim2.new(1, -15, 0, 80); ProfileFrame.BackgroundColor3 = LighterBg; Instance.new("UICorner", ProfileFrame).CornerRadius = UDim.new(0, 8); Instance.new("UIStroke", ProfileFrame).Color = MainGreen
 local AvatarImage = Instance.new("ImageLabel", ProfileFrame); AvatarImage.Size = UDim2.new(0, 60, 0, 60); AvatarImage.Position = UDim2.new(0, 10, 0, 10); AvatarImage.BackgroundColor3 = Color3.fromRGB(30, 30, 35); Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(1, 0)
 
--- AKIŞI DURDURAN YIELD İŞLEMİ DÜZELTİLDİ (task.spawn içine alındı)
 task.spawn(function()
     pcall(function() 
         local content, isReady = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
@@ -277,25 +314,24 @@ task.spawn(function()
 end)
 
 local NameLabel = Instance.new("TextLabel", ProfileFrame); NameLabel.Size = UDim2.new(1, -90, 0, 30); NameLabel.Position = UDim2.new(0, 80, 0, 10); NameLabel.BackgroundTransparency = 1; NameLabel.Text = "👤 " .. LocalPlayer.Name; NameLabel.TextColor3 = MainGreen; NameLabel.Font = Enum.Font.GothamBold; NameLabel.TextXAlignment = Enum.TextXAlignment.Left; NameLabel.TextSize = 16
-local TimeLabel = Instance.new("TextLabel", ProfileFrame); TimeLabel.Size = UDim2.new(1, -90, 0, 30); TimeLabel.Position = UDim2.new(0, 80, 0, 40); TimeLabel.BackgroundTransparency = 1; TimeLabel.Text = "⏱️ Oynama Süresi: 00:00:00"; TimeLabel.TextColor3 = Color3.new(1, 1, 1); TimeLabel.Font = Enum.Font.Gotham; TimeLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-local StartTime = tick()
-AddConnection(RunService.RenderStepped:Connect(function()
-    local elapsed = tick() - StartTime
-    TimeLabel.Text = string.format("⏱️ Oynama Süresi: %02d:%02d:%02d", math.floor(elapsed / 3600), math.floor((elapsed % 3600) / 60), math.floor(elapsed % 60))
-end))
 
 local MenuKeybind = Enum.KeyCode.RightControl
 local KeybindBtn = Instance.new("TextButton", TabSettings); KeybindBtn.Size = UDim2.new(1, -15, 0, 45); KeybindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50); KeybindBtn.Text = "Menü Tuşu: RightControl (Değiştir)"; KeybindBtn.TextColor3 = Color3.new(1,1,1); KeybindBtn.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeybindBtn).CornerRadius = UDim.new(0, 6)
+
 KeybindBtn.MouseButton1Click:Connect(function()
     KeybindBtn.Text = "Yeni tuşa basın..."
     local conn; conn = UserInputService.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Keyboard then MenuKeybind = input.KeyCode; KeybindBtn.Text = "Menü Tuşu: " .. MenuKeybind.Name; conn:Disconnect() end
+        if input.UserInputType == Enum.UserInputType.Keyboard then 
+            MenuKeybind = input.KeyCode
+            KeybindBtn.Text = "Menü Tuşu: " .. MenuKeybind.Name
+            conn:Disconnect() 
+        end
     end)
 end)
 
-AddConnection(UserInputService.InputBegan:Connect(function(input, gpe)
-    if not gpe and input.KeyCode == MenuKeybind then 
+-- NOT: gpe filtresi kaldırıldı, böylece her ortamda tuş kesinlikle algılanır!
+AddConnection(UserInputService.InputBegan:Connect(function(input)
+    if input.KeyCode == MenuKeybind then 
         if Main then 
             Main.Visible = not Main.Visible
             if Blur then Blur.Enabled = Main.Visible end 
@@ -303,4 +339,4 @@ AddConnection(UserInputService.InputBegan:Connect(function(input, gpe)
     end
 end))
 
-print("FURENT_LSC v25.0 VIP - Optimizasyon Tamamlandı ve Yüklendi!")
+print("FURENT_LSC v25.0 VIP - ENJEKTE EDİLDİ VE TUŞ KİLİDİ AÇILDI!")
