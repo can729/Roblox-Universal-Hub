@@ -1,4 +1,4 @@
--- FURENT_LSC v31.0 - KEY SYSTEM & CLUSTER FIX EDITION
+-- FURENT_LSC v32.0 - FINAL BOSS EDITION (Owner Key, 150 Users, Full Features)
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,20 +10,25 @@ local StarterGui = game:GetService("StarterGui")
 local Camera = workspace.CurrentCamera
 local LocalPlayer = Players.LocalPlayer
 
--- [ GÜVENLİK ] ANAHTAR ŞİFRESİ
-local CORRECT_KEY = "FURENT-VIP-2026"
+-- [ GÜVENLİK ] ANAHTAR ŞİFRELERİ VE BİTİŞ TARİHİ
+local OWNER_KEY = "FURENT-OWNER-KING"
+
+-- 3 Hafta Sonrasının Tarihi (12 Temmuz 2026)
+local EXPIRE_DATE = os.time({year = 2026, month = 7, day = 12, hour = 23, min = 59, sec = 59})
+
+-- 150 Adet Geçerli Kullanıcı Anahtarı (Virgülle Ayrılmış Liste)
+local KeysString = "FURENT-A1B2-C3D4,FURENT-E5F6-G7H8,FURENT-I9J0-K1L2,FURENT-M3N4-O5P6,FURENT-Q7R8-S9T0,FURENT-U1V2-W3X4,FURENT-Y5Z6-A7B8,FURENT-C9D0-E1F2,FURENT-G3H4-I5J6,FURENT-K7L8-M9N0,FURENT-O1P2-Q3R4,FURENT-S5T6-U7V8,FURENT-W9X0-Y1Z2,FURENT-A3B4-C5D6,FURENT-E7F8-G9H0,FURENT-I1J2-K3L4,FURENT-M5N6-O7P8,FURENT-Q9R0-S1T2,FURENT-U3V4-W5X6,FURENT-Y7Z8-A9B0,FURENT-C1D2-E3F4,FURENT-G5H6-I7J8,FURENT-K9L0-M1N2,FURENT-O3P4-Q5R6,FURENT-S7T8-U9V0,FURENT-W1X2-Y3Z4,FURENT-A5B6-C7D8,FURENT-E9F0-G1H2,FURENT-I3J4-K5L6,FURENT-M7N8-O9P0,FURENT-Q1R2-S3T4,FURENT-U5V6-W7X8,FURENT-Y9Z0-A1B2,FURENT-C3D4-E5F6,FURENT-G7H8-I9J0,FURENT-K1L2-M3N4,FURENT-O5P6-Q7R8,FURENT-S9T0-U1V2,FURENT-W3X4-Y5Z6,FURENT-A7B8-C9D0,FURENT-E1F2-G3H4,FURENT-I5J6-K7L8,FURENT-M9N0-O1P2,FURENT-Q3R4-S5T6,FURENT-U7V8-W9X0,FURENT-Y1Z2-A3B4,FURENT-C5D6-E7F8,FURENT-G9H0-I1J2,FURENT-K3L4-M5N6,FURENT-O7P8-Q9R0,FURENT-S1T2-U3V4,FURENT-W5X6-Y7Z8,FURENT-A9B0-C1D2,FURENT-E3F4-G5H6,FURENT-I7J8-K9L0,FURENT-M1N2-O3P4,FURENT-Q5R6-S7T8,FURENT-U9V0-W1X2,FURENT-Y3Z4-A5B6,FURENT-C7D8-E9F0,FURENT-G1H2-I3J4,FURENT-K5L6-M7N8,FURENT-O9P0-Q1R2,FURENT-S3T4-U5V6,FURENT-W7X8-Y9Z0,FURENT-A1B2-C3D5,FURENT-E5F6-G7H9,FURENT-I9J0-K1L3,FURENT-M3N4-O5P7,FURENT-Q7R8-S9T1,FURENT-U1V2-W3X5,FURENT-Y5Z6-A7B9,FURENT-C9D0-E1F3,FURENT-G3H4-I5J7,FURENT-K7L8-M9N1,FURENT-O1P2-Q3R5,FURENT-S5T6-U7V9,FURENT-W9X0-Y1Z3,FURENT-A3B4-C5D7,FURENT-E7F8-G9H1,FURENT-I1J2-K3L5,FURENT-M5N6-O7P9,FURENT-Q9R0-S1T3,FURENT-U3V4-W5X7,FURENT-Y7Z8-A9B1,FURENT-C1D2-E3F5,FURENT-G5H6-I7J9,FURENT-K9L0-M1N3,FURENT-O3P4-Q5R7,FURENT-S7T8-U9V1,FURENT-W1X2-Y3Z5,FURENT-A5B6-C7D9,FURENT-E9F0-G1H3,FURENT-I3J4-K5L7,FURENT-M7N8-O9P1,FURENT-Q1R2-S3T5,FURENT-U5V6-W7X9,FURENT-Y9Z0-A1B3,FURENT-C3D4-E5F7,FURENT-G7H8-I9J1,FURENT-K1L2-M3N5,FURENT-O5P6-Q7R9,FURENT-S9T0-U1V3,FURENT-W3X4-Y5Z7,FURENT-A7B8-C9D1,FURENT-E1F2-G3H5,FURENT-I5J6-K7L9,FURENT-M9N0-O1P3,FURENT-Q3R4-S5T7,FURENT-U7V8-W9X1,FURENT-Y1Z2-A3B5,FURENT-C5D6-E7F9,FURENT-G9H0-I1J3,FURENT-K3L4-M5N7,FURENT-O7P8-Q9R1,FURENT-S1T2-U3V5,FURENT-W5X6-Y7Z9,FURENT-A9B0-C1D3,FURENT-E3F4-G5H7,FURENT-I7J8-K9L1,FURENT-M1N2-O3P5,FURENT-Q5R6-S7T9,FURENT-U9V0-W1X3,FURENT-Y3Z4-A5B7,FURENT-C7D8-E9F1,FURENT-G1H2-I3J5,FURENT-K5L6-M7N9,FURENT-O9P0-Q1R3,FURENT-S3T4-U5V7,FURENT-W7X8-Y9Z1,FURENT-B1C2-D3E4,FURENT-F5G6-H7I8,FURENT-J9K0-L1M2,FURENT-N3O4-P5Q6,FURENT-R7S8-T9U0,FURENT-V1W2-X3Y4,FURENT-Z5A6-B7C8,FURENT-D9E0-F1G2,FURENT-H3I4-J5K6,FURENT-L7M8-N9O0,FURENT-P1Q2-R3S4,FURENT-T5U6-V7W8,FURENT-X9Y0-Z1A2,FURENT-B3C4-D5E6,FURENT-F7G8-H9I0,FURENT-J1K2-L3M4,FURENT-N5O6-P7Q8,FURENT-R9S0-T1U2,FURENT-V3W4-X5Y6"
+local ValidKeys = string.split(KeysString, ",")
 
 -- GLOBAL TEMA RENGİ
 _G.ThemeColor = Color3.fromRGB(0, 255, 120)
 
--- [0] BAĞLANTI TEMİZLİĞİ
 if _G.FurentConnections then
     for _, conn in pairs(_G.FurentConnections) do pcall(function() conn:Disconnect() end) end
 end
 _G.FurentConnections = {}
 local function AddConnection(conn) table.insert(_G.FurentConnections, conn) end
 
--- [1] ESKİ KALINTILARI TEMİZLE
 pcall(function()
     local oldTarget = (gethui and gethui()) or game:GetService("CoreGui") or LocalPlayer:FindFirstChild("PlayerGui")
     if oldTarget and oldTarget:FindFirstChild("FURENT_PRO_UI") then oldTarget.FURENT_PRO_UI:Destroy() end
@@ -44,7 +49,6 @@ pcall(function() Blur.Parent = Lighting end)
 local DarkBg = Color3.fromRGB(12, 12, 16)
 local LighterBg = Color3.fromRGB(20, 20, 25)
 
--- YARDIMCI FONKSİYONLAR
 local function AddHoverEffect(guiObject, baseColor, hoverColor, transparencyBase, transparencyHover)
     guiObject.MouseEnter:Connect(function() TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = hoverColor, BackgroundTransparency = transparencyHover or 0}):Play() end)
     guiObject.MouseLeave:Connect(function() TweenService:Create(guiObject, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = baseColor, BackgroundTransparency = transparencyBase or 0}):Play() end)
@@ -86,15 +90,14 @@ Instance.new("UICorner", GetKeyBtn).CornerRadius = UDim.new(0, 6)
 
 GetKeyBtn.MouseButton1Click:Connect(function()
     if setclipboard then setclipboard("https://discord.gg/fs28GEBuSX") end
-    GetKeyBtn.Text = "Kopyalandı!"
+    GetKeyBtn.Text = "Link Kopyalandı!"
     task.wait(2); GetKeyBtn.Text = "Anahtar Al (Discord Linkini Kopyala)"
 end)
 
--- ANA YÜKLEME FONKSİYONU
+-- ==========================================
+-- [ BÖLÜM 2: ANA MENÜ VE ÖZELLİKLER ]
+-- ==========================================
 local function LoadMainUI()
-    -- ==========================================
-    -- [ BÖLÜM 2: ANA MENÜ ]
-    -- ==========================================
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 750, 0, 520); Main.Position = UDim2.new(0.5, -375, 0.5, -260)
     Main.BackgroundColor3 = DarkBg; Main.BackgroundTransparency = 0.05
@@ -144,7 +147,7 @@ local function LoadMainUI()
     local TabContainer = Instance.new("Frame", Main)
     TabContainer.Size = UDim2.new(1, -190, 1, -20); TabContainer.Position = UDim2.new(0, 190, 0, 10); TabContainer.BackgroundTransparency = 1; TabContainer.ZIndex = 2
 
-    -- UI MOTORU
+    -- UI MOTORU & SEKMELER
     local Tabs = {}
     local function CreateTab(iconText, yPos, isActiveDefault)
         local TabBtn = Instance.new("TextButton", Sidebar); TabBtn.Size = UDim2.new(0, 160, 0, 38); TabBtn.Position = UDim2.new(0, 10, 0, yPos); TabBtn.Text = "  " .. iconText; TabBtn.TextColor3 = isActiveDefault and Color3.new(1,1,1) or Color3.fromRGB(150,150,150); TabBtn.BackgroundColor3 = isActiveDefault and _G.ThemeColor or Color3.fromRGB(15, 15, 20); TabBtn.BackgroundTransparency = isActiveDefault and 0.5 or 0.2; TabBtn.Font = Enum.Font.GothamBold; TabBtn.TextSize = 14; TabBtn.TextXAlignment = Enum.TextXAlignment.Left; TabBtn.ZIndex = 3
@@ -186,6 +189,12 @@ local function LoadMainUI()
         UserInputService.InputChanged:Connect(function(input) if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then local relX = math.clamp((UserInputService:GetMouseLocation().X - SliderBG.AbsolutePosition.X) / SliderBG.AbsoluteSize.X, 0, 1); TweenService:Create(SliderFill, TweenInfo.new(0.1), {Size = UDim2.new(relX, 0, 1, 0)}):Play(); local value = math.floor(min + (max - min) * relX); Label.Text = text .. " : " .. value; pcall(callback, value) end end)
     end
 
+    local function CreateTextBox(parent, placeholder, callback)
+        local TextBox = Instance.new("TextBox", parent); TextBox.Size = UDim2.new(1, -15, 0, 45); TextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 25); TextBox.PlaceholderText = placeholder; TextBox.Text = ""; TextBox.TextColor3 = Color3.new(1,1,1); TextBox.Font = Enum.Font.Gotham; TextBox.TextSize = 14; TextBox.ZIndex = 3
+        Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", TextBox).Color = _G.ThemeColor
+        TextBox.FocusLost:Connect(function() callback(TextBox.Text) end)
+    end
+
     local function CreateColorPicker(parent, text)
         local Container = Instance.new("Frame", parent); Container.Size = UDim2.new(1, -15, 0, 110); Container.BackgroundColor3 = LighterBg; Container.BackgroundTransparency = 0.2; Instance.new("UICorner", Container).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Container).Color = Color3.fromRGB(50, 50, 60)
         local Label = Instance.new("TextLabel", Container); Label.Size = UDim2.new(1, -60, 0, 20); Label.Position = UDim2.new(0, 15, 0, 10); Label.Text = text; Label.TextColor3 = Color3.new(1,1,1); Label.Font = Enum.Font.GothamSemibold; Label.TextSize = 14; Label.TextXAlignment = Enum.TextXAlignment.Left; Label.BackgroundTransparency = 1
@@ -205,8 +214,11 @@ local function LoadMainUI()
 
     local TabVisuals    = CreateTab("👁️ Visuals", 80, true)
     local TabPlayer     = CreateTab("👤 Player", 125, false)
-    local TabAutoFarm   = CreateTab("⚡ AutoFarm", 170, false)
-    local TabSettings   = CreateTab("⚙️ Settings", 215, false)
+    local TabWorld      = CreateTab("🌍 World", 170, false)
+    local TabTeleport   = CreateTab("📍 Teleport", 215, false)
+    local TabAutoFarm   = CreateTab("⚡ AutoFarm", 260, false)
+    local TabSkin       = CreateTab("🎭 Skin Changer", 305, false)
+    local TabSettings   = CreateTab("⚙️ Settings", 350, false)
 
     -- [8] VISUALS (FIXED CLUSTER & LIMIT)
     local VSettings = { Box = false, Tracer = false, RoomESP = false, Chams = false }
@@ -237,58 +249,35 @@ local function LoadMainUI()
             count = count + 1
             if count % 5000 == 0 then task.wait() end 
 
-            -- Sadece 3D dünyadaki yazılara bak (ScreenGui engeli)
             if obj:IsA("TextLabel") and obj:FindFirstAncestorWhichIsA("BillboardGui") or obj:FindFirstAncestorWhichIsA("SurfaceGui") then
                 local txt = string.lower(obj.Text)
                 if txt:find("x") or txt:find("şans") or txt:find("%%") then
                     local rootPart = obj:FindFirstAncestorWhichIsA("BasePart")
                     if rootPart then
-                        table.insert(rawFound, {
-                            part = rootPart,
-                            model = obj:FindFirstAncestorWhichIsA("Model") or rootPart,
-                            text = "🥚 " .. obj.Text,
-                            color = obj.TextColor3 or Color3.fromRGB(255, 215, 0),
-                            pos = rootPart.Position,
-                            dist = (rootPart.Position - hrp.Position).Magnitude
-                        })
+                        table.insert(rawFound, {part = rootPart, model = obj:FindFirstAncestorWhichIsA("Model") or rootPart, text = "🥚 " .. obj.Text, color = obj.TextColor3 or Color3.fromRGB(255, 215, 0), pos = rootPart.Position, dist = (rootPart.Position - hrp.Position).Magnitude})
                     end
                 end
             end
         end
 
-        -- 1. CLUSTERING (KÜMELEME) SİSTEMİ - ÜST ÜSTE BİNEN YAZILARI FİXLER!
         local clusteredData = {}
         for _, data in ipairs(rawFound) do
             local isDuplicate = false
             for _, c in ipairs(clusteredData) do
-                -- Eğer 5 stud (adım) yakınında zaten bir yazı bulduysak, bu aynı yumurtanın diğer yazısıdır. Atla!
-                if (c.pos - data.pos).Magnitude < 5 then
-                    isDuplicate = true
-                    break
-                end
+                if (c.pos - data.pos).Magnitude < 5 then isDuplicate = true; break end
             end
             if not isDuplicate then table.insert(clusteredData, data) end
         end
 
-        -- 2. MESAFEYE GÖRE SIRALAMA VE HIGHLIGHT LİMİTİ FİXİ
         table.sort(clusteredData, function(a, b) return a.dist < b.dist end)
-
         ClearRoomESP()
         
-        -- Roblox max 31 Highlight sınırına takılmamak için sadece en yakın 30 taneye parlama veriyoruz
         local highlightCount = 0
         for _, data in ipairs(clusteredData) do
             CreateBillboard(data.part, data.text, data.color, Vector3.new(0, 6, 0))
-            
             highlightCount = highlightCount + 1
             if highlightCount <= 30 then
-                local hl = Instance.new("Highlight")
-                hl.Name = "F_RoomESP_HL"
-                hl.FillColor = data.color
-                hl.OutlineColor = Color3.new(1, 1, 1)
-                hl.FillTransparency = 0.4
-                hl.OutlineTransparency = 0.1
-                hl.Parent = data.model
+                local hl = Instance.new("Highlight"); hl.Name = "F_RoomESP_HL"; hl.FillColor = data.color; hl.OutlineColor = Color3.new(1, 1, 1); hl.FillTransparency = 0.4; hl.OutlineTransparency = 0.1; hl.Parent = data.model
                 table.insert(FurentESPInstances, hl)
             end
         end
@@ -299,24 +288,19 @@ local function LoadMainUI()
     task.spawn(function()
         while task.wait(1) do
             if VSettings.RoomESP and not isScanning then 
-                if tick() - lastScanTick >= 30 then
-                    isScanning = true; pcall(PerformScan); lastScanTick = tick(); isScanning = false
-                end
+                if tick() - lastScanTick >= 30 then isScanning = true; pcall(PerformScan); lastScanTick = tick(); isScanning = false end
             end
         end
     end)
 
     CreateToggle(TabVisuals, "2D Box ESP (Oyuncular)", function(s) VSettings.Box = s end)
+    CreateToggle(TabVisuals, "Tracer ESP (Oyuncular)", function(s) VSettings.Tracer = s end)
     CreateToggle(TabVisuals, "Chams (Oyuncu Parla)", function(s) VSettings.Chams = s end)
-    CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) 
-        VSettings.RoomESP = s
-        if s then lastScanTick = tick(); if not isScanning then isScanning = true; task.spawn(function() pcall(PerformScan); isScanning = false end) end else ClearRoomESP() end
-    end)
+    CreateToggle(TabVisuals, "Yumurta & Şifre ESP (Oda İçi)", function(s) VSettings.RoomESP = s; if s then lastScanTick = tick(); if not isScanning then isScanning = true; task.spawn(function() pcall(PerformScan); isScanning = false end) end else ClearRoomESP() end end)
     CreateButton(TabVisuals, "🔄 ESP Yazılarını Anında Yenile", function() if not isScanning then isScanning = true; lastScanTick = tick(); pcall(PerformScan); isScanning = false end end)
 
-    -- ESP & CHAMS LOOP
     local DrawingSupported = pcall(function() local _ = Drawing.new("Line") end)
-    local ESP_Boxes = {}
+    local ESP_Boxes = {}; local ESP_Lines = {}
     AddConnection(RunService.RenderStepped:Connect(function()
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= LocalPlayer then
@@ -330,13 +314,16 @@ local function LoadMainUI()
                     end
                 end
                 if DrawingSupported then
-                    if not ESP_Boxes[player] then pcall(function() ESP_Boxes[player] = Drawing.new("Square"); ESP_Boxes[player].Thickness = 1.5; ESP_Boxes[player].Filled = false end) end
-                    local box = ESP_Boxes[player]
-                    if box then
-                        if VSettings.Box and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    if not ESP_Boxes[player] then pcall(function() ESP_Boxes[player] = Drawing.new("Square"); ESP_Boxes[player].Thickness = 1.5; ESP_Boxes[player].Filled = false; ESP_Lines[player] = Drawing.new("Line"); ESP_Lines[player].Thickness = 1 end) end
+                    local box = ESP_Boxes[player]; local line = ESP_Lines[player]
+                    if box and line then
+                        if (VSettings.Box or VSettings.Tracer) and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                             local pos, onScreen = Camera:WorldToViewportPoint(player.Character.HumanoidRootPart.Position)
-                            if onScreen then box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z); box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2); box.Color = _G.ThemeColor; box.Visible = true else box.Visible = false end
-                        else box.Visible = false end
+                            if onScreen then
+                                if VSettings.Box then box.Size = Vector2.new(2000 / pos.Z, 3000 / pos.Z); box.Position = Vector2.new(pos.X - box.Size.X / 2, pos.Y - box.Size.Y / 2); box.Color = _G.ThemeColor; box.Visible = true else box.Visible = false end
+                                if VSettings.Tracer then line.Color = _G.ThemeColor; line.From = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y); line.To = Vector2.new(pos.X, pos.Y); line.Visible = true else line.Visible = false end
+                            else box.Visible = false; line.Visible = false end
+                        else box.Visible = false; line.Visible = false end
                     end
                 end
             end
@@ -344,13 +331,56 @@ local function LoadMainUI()
     end))
 
     -- PLAYER MODS
-    local PSettings = { Speed = 16, Jump = 50 }
+    local PSettings = { Speed = 16, Jump = 50, Fly = false, FlySpeed = 50, Spider = false }
+    CreateToggle(TabPlayer, "Fly (Uçma - WASD/Boşluk)", function(s) PSettings.Fly = s end)
+    CreateSlider(TabPlayer, "Fly Hızı", 10, 300, 50, function(val) PSettings.FlySpeed = val end)
+    CreateToggle(TabPlayer, "Spider (Duvara Tırmanma)", function(s) PSettings.Spider = s end)
     CreateSlider(TabPlayer, "Walk Speed", 16, 300, 16, function(val) PSettings.Speed = val end)
     CreateSlider(TabPlayer, "Jump Power", 50, 400, 50, function(val) PSettings.Jump = val end)
+
     task.spawn(function()
         while task.wait(0.1) do
             local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid")
-            if hum then hum.WalkSpeed = PSettings.Speed; hum.JumpPower = PSettings.Jump end
+            if hum and not PSettings.Fly then hum.WalkSpeed = PSettings.Speed; hum.JumpPower = PSettings.Jump end
+        end
+    end)
+
+    AddConnection(RunService.RenderStepped:Connect(function()
+        local char = LocalPlayer.Character
+        if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChild("Humanoid") then return end
+        local hrp = char.HumanoidRootPart; local hum = char.Humanoid
+
+        if PSettings.Fly then
+            hum.PlatformStand = true
+            local camCFrame = workspace.CurrentCamera.CFrame; local moveDir = Vector3.new(0, 0, 0)
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camCFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camCFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camCFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camCFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then moveDir = moveDir - Vector3.new(0, 1, 0) end
+            if moveDir.Magnitude > 0 then hrp.Velocity = moveDir.Unit * PSettings.FlySpeed else hrp.Velocity = Vector3.new(0, 0, 0) end
+            hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + camCFrame.LookVector)
+        else
+            if hum.PlatformStand then hum.PlatformStand = false end
+        end
+
+        if PSettings.Spider and not PSettings.Fly then
+            local result = workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 3, RaycastParams.new())
+            if result and UserInputService:IsKeyDown(Enum.KeyCode.W) then hrp.Velocity = Vector3.new(hrp.Velocity.X, 50, hrp.Velocity.Z) end
+        end
+    end))
+
+    -- WORLD & TELEPORT
+    CreateSlider(TabWorld, "Yerçekimi (Gravity)", 0, 500, 196, function(val) workspace.Gravity = val end)
+    CreateSlider(TabWorld, "Saat (ClockTime)", 0, 24, 14, function(val) Lighting.ClockTime = val end)
+    local TargetName = ""
+    CreateTextBox(TabTeleport, "Oyuncu Adını Girin...", function(txt) TargetName = string.lower(txt) end)
+    CreateButton(TabTeleport, "Oyuncuya Işınlan", function()
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and string.sub(string.lower(p.Name), 1, #TargetName) == TargetName and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then 
+                LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame; break 
+            end
         end
     end)
 
@@ -360,10 +390,27 @@ local function LoadMainUI()
     local AutoInteractOn = false
     CreateToggle(TabAutoFarm, "Auto Interact (E Tuşu Spam)", function(state) AutoInteractOn = state; task.spawn(function() while AutoInteractOn do pcall(function() VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game) end); task.wait(0.1) end end) end)
 
+    -- SKIN CHANGER
+    local ChangerData = { Shirt = "", Pants = "", TShirt = "", Face = "" }
+    CreateTextBox(TabSkin, "Kıyafet (Shirt) ID...", function(txt) ChangerData.Shirt = txt end)
+    CreateTextBox(TabSkin, "Pantolon (Pants) ID...", function(txt) ChangerData.Pants = txt end)
+    CreateTextBox(TabSkin, "T-Shirt ID...", function(txt) ChangerData.TShirt = txt end)
+    CreateTextBox(TabSkin, "Yüz (Face) ID...", function(txt) ChangerData.Face = txt end)
+    CreateButton(TabSkin, "Kombini Uygula", function()
+        local char = LocalPlayer.Character
+        if not char then return end
+        pcall(function()
+            if ChangerData.Shirt ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("Shirt") then v:Destroy() end end; local s = Instance.new("Shirt", char); s.ShirtTemplate = "rbxassetid://" .. ChangerData.Shirt end
+            if ChangerData.Pants ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("Pants") then v:Destroy() end end; local p = Instance.new("Pants", char); p.PantsTemplate = "rbxassetid://" .. ChangerData.Pants end
+            if ChangerData.TShirt ~= "" then for _,v in pairs(char:GetChildren()) do if v:IsA("ShirtGraphic") then v:Destroy() end end; local ts = Instance.new("ShirtGraphic", char); ts.Graphic = "rbxassetid://" .. ChangerData.TShirt end
+            if ChangerData.Face ~= "" and char:FindFirstChild("Head") then local face = char.Head:FindFirstChildOfClass("Decal"); if face then face.Texture = "rbxassetid://" .. ChangerData.Face else local nf = Instance.new("Decal", char.Head); nf.Texture = "rbxassetid://" .. ChangerData.Face end end
+        end)
+    end)
+    CreateButton(TabSkin, "Aksesuarları Sil", function() local char = LocalPlayer.Character; if char then for _, v in pairs(char:GetChildren()) do if v:IsA("Accessory") or v:IsA("Hat") then v:Destroy() end end end end)
+
     -- SETTINGS
     CreateColorPicker(TabSettings, "Arayüz Tema Rengini Ayarla")
     CreateToggle(TabSettings, "Arka Plan Yağmurunu Kapat", function(state) RainEnabled = not state; for _, drop in ipairs(Raindrops) do drop.obj.Visible = not state end end)
-    
     local MenuKeybind = Enum.KeyCode.RightControl
     local KeybindBtn = Instance.new("TextButton", TabSettings); KeybindBtn.Size = UDim2.new(1, -15, 0, 45); KeybindBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 50); KeybindBtn.Text = "Menü Tuşu: RightControl (Değiştir)"; KeybindBtn.TextColor3 = Color3.new(1,1,1); KeybindBtn.Font = Enum.Font.GothamBold; Instance.new("UICorner", KeybindBtn).CornerRadius = UDim.new(0, 6)
     KeybindBtn.MouseButton1Click:Connect(function() KeybindBtn.Text = "Yeni tuşa basın..."; local conn; conn = UserInputService.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.Keyboard then MenuKeybind = input.KeyCode; KeybindBtn.Text = "Menü Tuşu: " .. MenuKeybind.Name; conn:Disconnect() end end) end)
@@ -379,22 +426,67 @@ local function LoadMainUI()
     end))
 end
 
--- KEY KONTROL SİSTEMİ
+-- ==========================================
+-- [ BÖLÜM 3: KEY KONTROL LOJİĞİ ]
+-- ==========================================
 VerifyBtn.MouseButton1Click:Connect(function()
-    if KeyInput.Text == CORRECT_KEY then
-        VerifyBtn.Text = "DOĞRULANDI, YÜKLENİYOR..."
-        VerifyBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        task.wait(0.5)
+    local inputKey = KeyInput.Text
+    local isOwner = (inputKey == OWNER_KEY)
+    local isValidUser = false
+
+    -- Girdiği şifre veritabanındaki 150 şifreden biri mi kontrol et
+    if not isOwner then
+        for _, valid in ipairs(ValidKeys) do
+            if inputKey == valid then
+                isValidUser = true
+                break
+            end
+        end
+    end
+
+    if isOwner then
+        -- OWNER GİRİŞİ (Kral Tacı)
+        VerifyBtn.Text = "👑 " .. LocalPlayer.Name .. " - WELCOME"
+        VerifyBtn.BackgroundColor3 = Color3.fromRGB(255, 215, 0) -- Altın rengi
+        task.wait(1.5)
+        VerifyBtn.Text = "Sistemimize hoşgeldiniz Kral..."
+        task.wait(1)
         
-        -- Key menüsünü yok et ve ana UI'ı yükle
+        -- Key ekranını kapat ve Ana menüyü yükle
         local closeTween = TweenService:Create(KeyScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0.5})
         closeTween:Play()
         closeTween.Completed:Wait()
         KeyFrame:Destroy()
-        
         LoadMainUI()
+
+    elseif isValidUser then
+        -- NORMAL KULLANICI GİRİŞİ (Süre Kontrolü)
+        local currentTime = os.time()
+        
+        if currentTime > EXPIRE_DATE then
+            VerifyBtn.Text = "SÜRESİ DOLMUŞ KEY!"
+            VerifyBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+            task.wait(2)
+            VerifyBtn.Text = "GİRİŞ YAP"
+            VerifyBtn.BackgroundColor3 = _G.ThemeColor
+        else
+            VerifyBtn.Text = "👤 " .. LocalPlayer.Name .. " - WELCOME"
+            VerifyBtn.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            task.wait(1.5)
+            VerifyBtn.Text = "Sistemimize hoşgeldiniz..."
+            task.wait(1)
+            
+            -- Key ekranını kapat ve Ana menüyü yükle
+            local closeTween = TweenService:Create(KeyScale, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0.5})
+            closeTween:Play()
+            closeTween.Completed:Wait()
+            KeyFrame:Destroy()
+            LoadMainUI()
+        end
+
     else
-        VerifyBtn.Text = "YANLIŞ ANAHTAR!"
+        -- YANLIŞ ŞİFRE
+        VerifyBtn.Text = "GEÇERSİZ ANAHTAR!"
         VerifyBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
         task.wait(1.5)
         VerifyBtn.Text = "GİRİŞ YAP"
@@ -402,4 +494,4 @@ VerifyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-print("FURENT_LSC v31.0 - KEY SİSTEMİ BAŞLATILDI. ŞİFRE: " .. CORRECT_KEY)
+print("FURENT_LSC v32.0 FINAL BOSS - KEY SİSTEMİ DEVREDE!")
